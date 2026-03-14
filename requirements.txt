@@ -3,3 +3,5 @@ uvicorn
 faiss-cpu 
 gradio
 datasets
+librosa
+sentence-transformers
