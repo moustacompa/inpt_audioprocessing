@@ -1,7 +1,12 @@
-fastapi 
-uvicorn 
-faiss-cpu 
+fastapi
+uvicorn
+faiss-cpu
 gradio
 datasets
 librosa
+torchaudio
+numpy
+pandas
+torch
+transformers
 sentence-transformers
