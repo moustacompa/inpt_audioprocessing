@@ -14,6 +14,7 @@ librosa>=0.10.0
 soundfile>=0.12.1
 audioread>=3.0.0
 pyaudio>=0.2.13          # microphone input (Windows)
+torchcodec
 
 # Embeddings & ML
 numpy>=1.24.0
