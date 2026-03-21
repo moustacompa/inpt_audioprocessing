@@ -15,6 +15,7 @@ soundfile>=0.12.1
 audioread>=3.0.0
 pyaudio>=0.2.13          # microphone input (Windows)
 torchcodec
+onnxscript
 
 # Embeddings & ML
 numpy>=1.24.0
