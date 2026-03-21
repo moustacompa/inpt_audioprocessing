@@ -209,3 +209,4 @@ __marimo__/
 # Mamadou virtual environment
 mamadou/myenv/
 mamadou/data/
+mamadou/models/
