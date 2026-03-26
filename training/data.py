@@ -11,8 +11,16 @@ from torch.utils.data import Dataset
 
 
 TEXT_REQUIRED_COLUMNS = {"chunk_id", "document_id", "text"}
-PAIR_MIN_COLUMNS = {"audio_id", "document_id"}
+PAIR_MIN_COLUMNS = {"audio_id"}
 MANIFEST_MIN_COLUMNS = {"audio_id"}
+
+
+def _derive_document_id(df: pd.DataFrame) -> pd.DataFrame:
+    """Dérive document_id depuis chunk_id si absent (ex: doc00227_chunk031 → doc00227)."""
+    if "document_id" not in df.columns and "chunk_id" in df.columns:
+        df = df.copy()
+        df["document_id"] = df["chunk_id"].str.replace(r"_chunk\d+$", "", regex=True)
+    return df
 
 
 def _read_csv(path: str | Path) -> pd.DataFrame:
@@ -24,6 +32,9 @@ def _read_csv(path: str | Path) -> pd.DataFrame:
 
 def load_text_chunks(path: str | Path) -> pd.DataFrame:
     chunks = _read_csv(path)
+    # Toujours dériver document_id depuis chunk_id (garantit le type str et la cohérence
+    # avec les paires, même si doc_idx existe mais est numérique)
+    chunks = _derive_document_id(chunks)
     missing = TEXT_REQUIRED_COLUMNS.difference(chunks.columns)
     if missing:
         raise ValueError(
@@ -34,6 +45,11 @@ def load_text_chunks(path: str | Path) -> pd.DataFrame:
 
 def load_pairs(path: str | Path) -> pd.DataFrame:
     pairs = _read_csv(path)
+    # Normalise audio_file → audio_id (supprime l'extension .wav si présente)
+    if "audio_id" not in pairs.columns and "audio_file" in pairs.columns:
+        pairs = pairs.rename(columns={"audio_file": "audio_id"})
+        pairs["audio_id"] = pairs["audio_id"].str.replace(r"\.wav$", "", regex=True)
+    pairs = _derive_document_id(pairs)
     missing = PAIR_MIN_COLUMNS.difference(pairs.columns)
     if missing:
         raise ValueError(f"pairs file is missing columns: {sorted(missing)}")

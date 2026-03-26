@@ -11,6 +11,7 @@ from torch.optim import AdamW
 from torch.optim.lr_scheduler import LinearLR, SequentialLR
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
+from tqdm import tqdm
 
 from .data import AudioEmbeddingStore, DualEncoderDataset, build_collate_fn, load_pairs, load_text_chunks
 from .losses import contrastive_loss, triplet_loss
@@ -54,6 +55,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--val-split", default="val")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument(
+        "--num-workers", type=int, default=0,
+        help="Nombre de workers DataLoader (0 recommandé sur Windows pour éviter les segfaults).",
+    )
     return parser.parse_args()
 
 
@@ -202,6 +207,8 @@ def main() -> None:
         batch_size=args.batch_size,
         shuffle=True,
         collate_fn=collate_fn,
+        num_workers=args.num_workers,
+        pin_memory=False,
     )
 
     val_loader = None
@@ -216,6 +223,8 @@ def main() -> None:
             batch_size=args.batch_size,
             shuffle=False,
             collate_fn=collate_fn,
+            num_workers=args.num_workers,
+            pin_memory=False,
         )
 
     model = DualEncoderModel(
@@ -255,11 +264,28 @@ def main() -> None:
     best_score = float("-inf")
     best_metrics: dict[str, float] = {"Recall@5": 0.0, "Recall@10": 0.0, "MRR": 0.0}
 
-    for epoch in range(1, args.epochs + 1):
+    n_batches = len(train_loader)
+    print(
+        f"\nDébut de l'entraînement : {args.epochs} époques | "
+        f"{len(train_loader.dataset)} échantillons | "
+        f"{n_batches} batches/époque | "
+        f"device={args.device}\n"
+    )
+
+    epoch_bar = tqdm(range(1, args.epochs + 1), desc="Entraînement", unit="époque")
+
+    for epoch in epoch_bar:
         model.train()
         running_loss = 0.0
 
-        for batch in train_loader:
+        batch_bar = tqdm(
+            train_loader,
+            desc=f"  Époque {epoch}/{args.epochs}",
+            unit="batch",
+            leave=False,
+        )
+
+        for batch in batch_bar:
             optimizer.zero_grad()
 
             audio_embeddings = batch["audio_embeddings"].to(device)
@@ -285,31 +311,38 @@ def main() -> None:
             scheduler.step()
             running_loss += float(loss.item())
 
-        average_loss = running_loss / max(1, len(train_loader))
-        print(f"epoch={epoch} train_loss={average_loss:.4f}")
+            batch_bar.set_postfix(loss=f"{loss.item():.4f}", lr=f"{scheduler.get_last_lr()[0]:.2e}")
 
-        if val_loader is None:
-            continue
+        average_loss = running_loss / max(1, n_batches)
 
-        metrics = evaluate(model, val_loader, device)
-        print(
-            " ".join(
-                [
-                    f"epoch={epoch}",
-                    f"Recall@5={metrics['Recall@5']:.4f}",
-                    f"Recall@10={metrics['Recall@10']:.4f}",
-                    f"MRR={metrics['MRR']:.4f}",
-                ]
+        if val_loader is not None:
+            metrics = evaluate(model, val_loader, device)
+            epoch_bar.set_postfix(
+                loss=f"{average_loss:.4f}",
+                R5=f"{metrics['Recall@5']:.3f}",
+                R10=f"{metrics['Recall@10']:.3f}",
+                MRR=f"{metrics['MRR']:.3f}",
             )
-        )
-
-        if metrics["MRR"] > best_score:
-            best_score = metrics["MRR"]
-            best_metrics = metrics
-            save_checkpoint(output_dir, model, tokenizer, args, best_metrics)
+            tqdm.write(
+                f"[Époque {epoch:>3}/{args.epochs}] "
+                f"loss={average_loss:.4f} | "
+                f"Recall@5={metrics['Recall@5']:.4f} | "
+                f"Recall@10={metrics['Recall@10']:.4f} | "
+                f"MRR={metrics['MRR']:.4f}"
+                + (" ← meilleur" if metrics["MRR"] > best_score else "")
+            )
+            if metrics["MRR"] > best_score:
+                best_score = metrics["MRR"]
+                best_metrics = metrics
+                save_checkpoint(output_dir, model, tokenizer, args, best_metrics)
+        else:
+            epoch_bar.set_postfix(loss=f"{average_loss:.4f}")
+            tqdm.write(f"[Époque {epoch:>3}/{args.epochs}] loss={average_loss:.4f}")
 
     if val_loader is None:
         save_checkpoint(output_dir, model, tokenizer, args, best_metrics)
+
+    print(f"\nEntraînement terminé. Meilleur MRR={best_score:.4f} → {output_dir}/best_model.pt")
 
 
 if __name__ == "__main__":

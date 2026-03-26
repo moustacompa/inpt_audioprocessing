@@ -153,10 +153,7 @@ python utils/create_embeddings.py \
 Pour régénérer les embeddings texte du corpus (prototype MiniLM) :
 
 ```bash
-python utils/create_embeddings.py \
-  --mode text \
-  --input-csv   data/output/corpus_chunks.csv \
-  --output-path embeddings/text_embeddings.npy
+python utils/create_embeddings.py --mode text  --input-csv   data/output/corpus_chunks.csv --output-path embeddings/text_embeddings.npy
 ```
 
 ---
@@ -166,14 +163,7 @@ python utils/create_embeddings.py \
 L'entraînement aligne l'espace audio (Wav2Vec2 768D) et l'espace texte (MPNet 768D) dans un espace commun de dimension `--projection-dim`.
 
 ```bash
-python -m training.train_dual_encoder \
-  --text-chunks-csv       data/output/corpus_chunks.csv \
-  --pairs-csv             data/output/pairs_train.csv \
-  --val-pairs-csv         data/output/pairs_val.csv \
-  --audio-manifest-csv    embeddings/audio_embeddings_index.csv \
-  --audio-embeddings-npy  embeddings/audio_embeddings.npy \
-  --output-dir            models/dual_encoder_mpnet \
-  --text-model-name       sentence-transformers/all-mpnet-base-v2 \
+python -m training.train_dual_encoder   --text-chunks-csv       data/output/corpus_chunks.csv --pairs-csv             data/output/pairs_train.csv --val-pairs-csv         data/output/pairs_val.csv  --audio-manifest-csv    embeddings/audio_embeddings_index.csv --audio-embeddings-npy  embeddings/audio_embeddings.npy --output-dir            models/dual_encoder_mpnet   --text-model-name       sentence-transformers/all-mpnet-base-v2 \
   --projection-dim        768 \
   --epochs                20 \
   --batch-size            16 \

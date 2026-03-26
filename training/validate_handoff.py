@@ -45,8 +45,12 @@ def main() -> None:
         return
 
     pairs = pd.read_csv(args.pairs_csv)
+    # Normalise audio_file → audio_id (supprime l'extension .wav si présente)
+    if "audio_id" not in pairs.columns and "audio_file" in pairs.columns:
+        pairs = pairs.rename(columns={"audio_file": "audio_id"})
+        pairs["audio_id"] = pairs["audio_id"].str.replace(r"\.wav$", "", regex=True)
     if "audio_id" not in pairs.columns:
-        raise ValueError("pairs.csv must contain an 'audio_id' column")
+        raise ValueError("pairs.csv must contain an 'audio_id' or 'audio_file' column")
 
     manifest_ids = set(manifest["audio_id"].astype(str))
     pair_ids = set(pairs["audio_id"].astype(str))

@@ -211,3 +211,5 @@ models/
 # data/audio_clean/ and data/chunks/ can be large — uncomment to ignore:
 # data/audio_clean/
 # data/chunks/
+
+.audioprocessing
