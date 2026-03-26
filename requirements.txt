@@ -16,3 +16,9 @@ tqdm
 onnxruntime
 onnxscript
 python-multipart
+accelerate
+scipy
+matplotlib
+joblib
+ipykernel
+ipywidgets

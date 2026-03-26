@@ -206,7 +206,8 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# Mamadou virtual environment
-mamadou/myenv/
-# mamadou/data/
-mamadou/models/
+# Large data / model files (keep out of git)
+models/
+# data/audio_clean/ and data/chunks/ can be large — uncomment to ignore:
+# data/audio_clean/
+# data/chunks/
