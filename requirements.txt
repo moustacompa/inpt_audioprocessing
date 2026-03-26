@@ -10,3 +10,9 @@ pandas
 torch
 transformers
 sentence-transformers
+soundfile
+scikit-learn
+tqdm
+onnxruntime
+onnxscript
+python-multipart

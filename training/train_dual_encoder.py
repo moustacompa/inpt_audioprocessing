@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch.optim import AdamW
+from torch.optim.lr_scheduler import LinearLR, SequentialLR
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
@@ -45,6 +46,10 @@ def parse_args() -> argparse.Namespace:
         default="contrastive",
     )
     parser.add_argument("--freeze-text-encoder", action="store_true")
+    parser.add_argument("--warmup-steps", type=int, default=100,
+                        help="Nombre de steps pour le linear warmup du LR scheduler.")
+    parser.add_argument("--max-grad-norm", type=float, default=1.0,
+                        help="Gradient clipping (0 = désactivé).")
     parser.add_argument("--train-split", default="train")
     parser.add_argument("--val-split", default="val")
     parser.add_argument("--seed", type=int, default=42)
@@ -226,6 +231,27 @@ def main() -> None:
         lr=args.learning_rate,
     )
 
+    # Linear warmup puis LR constant (conformément au README)
+    total_steps = args.epochs * max(1, len(train_loader))
+    warmup_steps = min(args.warmup_steps, total_steps)
+    warmup_scheduler = LinearLR(
+        optimizer,
+        start_factor=1e-8,
+        end_factor=1.0,
+        total_iters=warmup_steps,
+    )
+    decay_scheduler = LinearLR(
+        optimizer,
+        start_factor=1.0,
+        end_factor=1e-2,
+        total_iters=max(1, total_steps - warmup_steps),
+    )
+    scheduler = SequentialLR(
+        optimizer,
+        schedulers=[warmup_scheduler, decay_scheduler],
+        milestones=[warmup_steps],
+    )
+
     best_score = float("-inf")
     best_metrics: dict[str, float] = {"Recall@5": 0.0, "Recall@10": 0.0, "MRR": 0.0}
 
@@ -253,7 +279,10 @@ def main() -> None:
                 margin=args.margin,
             )
             loss.backward()
+            if args.max_grad_norm > 0:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
             optimizer.step()
+            scheduler.step()
             running_loss += float(loss.item())
 
         average_loss = running_loss / max(1, len(train_loader))
