@@ -30,8 +30,11 @@ set CHECKPOINT=%OUTPUT_DIR%\best_model.pt
 set TEXT_CHUNK_EMBEDDINGS=embeddings\text_chunk_embeddings.npy
 set TEXT_CHUNK_MANIFEST=embeddings\text_chunk_manifest.csv
 
-set TEXT_MODEL=sentence-transformers/all-mpnet-base-v2
-set PROJECTION_DIM=768
+set PRECOMPUTED_TEXT_NPY=embeddings\precomputed_text.npy
+set PRECOMPUTED_TEXT_MANIFEST=embeddings\precomputed_text_manifest.csv
+
+set TEXT_MODEL=sentence-transformers/all-MiniLM-L6-v2
+set PROJECTION_DIM=256
 set EPOCHS=20
 set BATCH_SIZE=16
 set LEARNING_RATE=2e-5
@@ -127,14 +130,30 @@ if "%SKIP_TRAIN%"=="1" (
 ) else (
     if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"
 
-    python -m training.train_dual_encoder ^
+    :: --- Pre-calcul des embeddings texte (une seule fois, mode rapide) ---
+    echo.
+    echo [INFO]  Pre-calcul des embeddings texte...
+    python -m training.precompute_text ^
         --text-chunks-csv "%TEXT_CHUNKS_CSV%" ^
+        --model-name "%TEXT_MODEL%" ^
+        --output-npy "%PRECOMPUTED_TEXT_NPY%" ^
+        --output-manifest "%PRECOMPUTED_TEXT_MANIFEST%" ^
+        --batch-size 64
+    if errorlevel 1 (
+        echo [ERROR] Pre-calcul des embeddings texte echoue.
+        exit /b 1
+    )
+    echo [OK]    Embeddings texte pre-calcules : %PRECOMPUTED_TEXT_NPY%
+
+    :: --- Entrainement (mode rapide : projection uniquement) ---
+    python -m training.train_dual_encoder ^
+        --precomputed-text-npy "%PRECOMPUTED_TEXT_NPY%" ^
+        --precomputed-text-manifest "%PRECOMPUTED_TEXT_MANIFEST%" ^
         --pairs-csv "%PAIRS_TRAIN_CSV%" ^
         --val-pairs-csv "%PAIRS_VAL_CSV%" ^
         --audio-manifest-csv "%AUDIO_MANIFEST_CSV%" ^
         --audio-embeddings-npy "%AUDIO_EMBEDDINGS_NPY%" ^
         --output-dir "%OUTPUT_DIR%" ^
-        --text-model-name "%TEXT_MODEL%" ^
         --projection-dim %PROJECTION_DIM% ^
         --epochs %EPOCHS% ^
         --batch-size %BATCH_SIZE% ^
@@ -160,11 +179,13 @@ echo [INFO]  ETAPE 3 -- Export des embeddings texte
 echo ======================================================================
 
 python -m training.export_text_embeddings ^
+    --precomputed-text-npy "%PRECOMPUTED_TEXT_NPY%" ^
+    --precomputed-text-manifest "%PRECOMPUTED_TEXT_MANIFEST%" ^
     --text-chunks-csv "%TEXT_CHUNKS_CSV%" ^
     --checkpoint "%CHECKPOINT%" ^
     --output-embeddings-npy "%TEXT_CHUNK_EMBEDDINGS%" ^
     --output-manifest-csv "%TEXT_CHUNK_MANIFEST%" ^
-    --batch-size 32
+    --batch-size 64
 if errorlevel 1 (
     echo [ERROR] Export des embeddings texte echoue.
     exit /b 1

@@ -1,0 +1,95 @@
+\relax 
+\providecommand\zref@newlabel[2]{}
+\providecommand \babel@aux [2]{\global \let \babel@toc \@gobbletwo }
+\@nameuse{bbl@beforestart}
+\catcode `:\active 
+\catcode `;\active 
+\catcode `!\active 
+\catcode `?\active 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\babel@aux{french}{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{2}{section.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Vue d'ensemble du pipeline S2R}}{2}{table.caption.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Architecture globale}{3}{subsection.1.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Architecture complete du systeme Speech-to-Retrieval}}{3}{figure.caption.2}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:global}{{1}{3}{Architecture complete du systeme Speech-to-Retrieval}{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}P1 --- Data Engineer}{4}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Collecte des donnees audio}{4}{subsection.2.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Caracteristiques du dataset audio brut}}{4}{table.caption.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Pretraitement audio}{4}{subsection.2.2}\protected@file@percent }
+\newlabel{lst:snr}{{1}{4}{Estimation du SNR (Signal-to-Noise Ratio)}{lstlisting.1}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}{\ignorespaces Estimation du SNR (Signal-to-Noise Ratio)}}{4}{lstlisting.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Construction du corpus texte}{5}{subsection.2.3}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2}{\ignorespaces Pipeline de chunking avec fenetre glissante}}{5}{lstlisting.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Statistiques du corpus texte}}{5}{table.caption.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Creation des paires audio--document et split}{5}{subsection.2.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Repartition train / val / test (strategie 80/10/10)}}{6}{table.caption.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}P2 --- Speech AI Engineer}{7}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Modele Wav2Vec2}{7}{subsection.3.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Parametres du modele Wav2Vec2}}{7}{table.caption.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Architecture du SpeechEncoder}{8}{subsection.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Pipeline d'encodage audio P2}}{8}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:p2pipeline}{{2}{8}{Pipeline d'encodage audio P2}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Gestion du chargement audio (soundfile)}{8}{subsection.3.3}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3}{\ignorespaces Chargement audio robuste (src/speech\_encoder.py)}}{8}{lstlisting.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Mean pooling avec masque d'attention}{9}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Outputs de P2}{9}{subsection.3.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Fichiers produits par P2}}{9}{table.caption.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}P3 --- ML Engineer : Dual Encoder}{10}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Architecture du DualEncoderModel}{10}{subsection.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Architecture du DualEncoderModel (mode rapide)}}{10}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:dualenc}{{3}{10}{Architecture du DualEncoderModel (mode rapide)}{figure.caption.9}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4}{\ignorespaces DualEncoderModel simplifie (training/models.py)}}{10}{lstlisting.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Mode rapide (pre-calcul des embeddings texte)}{11}{subsection.4.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Comparaison mode complet vs mode rapide}}{11}{table.caption.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Fonction de perte}{11}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}Contrastive Loss (InfoNCE / NT-Xent)}{11}{subsubsection.4.3.1}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {5}{\ignorespaces Contrastive loss (InfoNCE) -- training/losses.py}}{11}{lstlisting.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}Triplet Loss}{12}{subsubsection.4.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Procedure d'entrainement}{12}{subsection.4.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Hyperparametres d'entrainement recommandes}}{12}{table.caption.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Metriques d'evaluation}{12}{subsection.4.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Objectifs de performance apres 20 epoques}}{13}{table.caption.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Export des embeddings texte (post-entrainement)}{13}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}P4 --- System Integration}{14}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Index FAISS}{14}{subsection.5.1}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {6}{\ignorespaces Construction de l'index FAISS (api/main.py)}}{14}{lstlisting.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}API REST FastAPI}{14}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Endpoints de l'API FastAPI (api/main.py)}}{14}{table.caption.13}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {7}{\ignorespaces Exemple de reponse /search/audio}}{14}{lstlisting.7}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {8}{\ignorespaces Lancement de l'API FastAPI}}{15}{lstlisting.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Interface Gradio}{15}{subsection.5.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Options de lancement de la demo Gradio}}{15}{table.caption.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Pipeline d'execution}{16}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Pipeline automatise (run\_pipeline.bat / .sh)}{16}{subsection.6.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces Etapes du pipeline automatise}}{16}{table.caption.15}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {9}{\ignorespaces Options du pipeline Windows}}{16}{lstlisting.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Entrainement sur Google Colab / Kaggle}{16}{subsection.6.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Performances d'entrainement selon la plateforme}}{16}{table.caption.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Verification des metriques}{17}{subsection.6.3}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {10}{\ignorespaces Validation des donnees P1/P2 (training/validate\_handoff.py)}}{17}{lstlisting.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Integration Snowflake}{18}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Architecture SQL}{18}{subsection.7.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces Tables principales du pipeline Snowflake}}{18}{table.caption.17}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {11}{\ignorespaces Schema de la table TEXT\_EMBEDDINGS dans Snowflake}}{18}{lstlisting.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Recherche par similarite vectorielle}{18}{subsection.7.2}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {12}{\ignorespaces Recherche top-5 dans Snowflake}}{18}{lstlisting.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Procedure stockee d'inference}{18}{subsection.7.3}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {13}{\ignorespaces Procedure d'inference S2R dans Snowflake}}{19}{lstlisting.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Problemes techniques et solutions}{20}{section.8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces Problemes techniques et corrections}}{20}{table.caption.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Resultats et evaluation}{21}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Bilan quantitatif global}{21}{subsection.9.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {16}{\ignorespaces Bilan quantitatif du projet complet}}{21}{table.caption.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Tests systeme}{21}{subsection.9.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {17}{\ignorespaces Resultats des tests systeme}}{21}{table.caption.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusion et perspectives}{22}{section.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Bilan}{22}{subsection.10.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}Perspectives d'amelioration}{22}{subsection.10.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {11}Annexe : Structure du projet}{22}{section.11}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {14}{\ignorespaces Arborescence du projet}}{22}{lstlisting.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {12}References}{23}{section.12}\protected@file@percent }
+\gdef \@abspage@last{25}

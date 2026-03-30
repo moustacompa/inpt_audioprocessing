@@ -13,7 +13,12 @@ from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 from tqdm import tqdm
 
-from .data import AudioEmbeddingStore, DualEncoderDataset, build_collate_fn, load_pairs, load_text_chunks
+from .data import (
+    AudioEmbeddingStore, TextEmbeddingStore,
+    DualEncoderDataset, FastDualEncoderDataset,
+    build_collate_fn, fast_collate,
+    load_pairs, load_text_chunks,
+)
 from .losses import contrastive_loss, triplet_loss
 from .metrics import retrieval_metrics
 from .models import DualEncoderModel
@@ -23,15 +28,25 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Train the speech-text dual encoder with precomputed audio embeddings."
     )
-    parser.add_argument("--text-chunks-csv", required=True)
     parser.add_argument("--pairs-csv", required=True)
     parser.add_argument("--val-pairs-csv")
     parser.add_argument("--audio-manifest-csv", required=True)
     parser.add_argument("--audio-embeddings-npy", required=True)
     parser.add_argument("--output-dir", required=True)
+    # --- Mode rapide (recommande sur CPU) ---
+    parser.add_argument(
+        "--precomputed-text-npy",
+        help="Embeddings texte pre-calcules (.npy). Active le mode rapide (pas de text encoder au training).",
+    )
+    parser.add_argument(
+        "--precomputed-text-manifest",
+        help="Manifest CSV des embeddings texte pre-calcules (colonne chunk_id requise).",
+    )
+    # --- Mode complet (necessite GPU pour etre raisonnable) ---
+    parser.add_argument("--text-chunks-csv", help="Requis en mode complet uniquement.")
     parser.add_argument(
         "--text-model-name",
-        default="sentence-transformers/all-mpnet-base-v2",
+        default="sentence-transformers/all-MiniLM-L6-v2",
     )
     parser.add_argument("--projection-dim", type=int, default=768)
     parser.add_argument("--epochs", type=int, default=20)
@@ -142,36 +157,37 @@ def evaluate(
     model: DualEncoderModel,
     dataloader: DataLoader,
     device: torch.device,
+    fast_mode: bool = False,
 ) -> dict[str, float]:
     model.eval()
     speech_batches = []
     text_batches = []
-    speech_document_ids: list[str] = []
-    text_document_ids: list[str] = []
+    chunk_ids: list[str] = []
 
     for batch in dataloader:
         audio_embeddings = batch["audio_embeddings"].to(device)
-        input_ids = batch["input_ids"].to(device)
-        attention_mask = batch["attention_mask"].to(device)
-
         speech_embeddings = model.encode_audio(audio_embeddings)
-        text_embeddings = model.encode_text(input_ids, attention_mask)
+
+        if fast_mode:
+            text_embeddings = model.encode_text_precomputed(batch["text_embeddings"].to(device))
+            chunk_ids.extend(batch["chunk_ids"])
+        else:
+            text_embeddings = model.encode_text(
+                batch["input_ids"].to(device), batch["attention_mask"].to(device)
+            )
+            chunk_ids.extend(batch["document_ids"])
 
         speech_batches.append(speech_embeddings.cpu())
         text_batches.append(text_embeddings.cpu())
-        speech_document_ids.extend(batch["document_ids"])
-        text_document_ids.extend(batch["document_ids"])
 
     if not speech_batches:
         return {"Recall@5": 0.0, "Recall@10": 0.0, "MRR": 0.0}
 
-    all_speech_embeddings = torch.cat(speech_batches, dim=0)
-    all_text_embeddings = torch.cat(text_batches, dim=0)
     return retrieval_metrics(
-        speech_embeddings=all_speech_embeddings,
-        text_embeddings=all_text_embeddings,
-        speech_document_ids=speech_document_ids,
-        text_document_ids=text_document_ids,
+        speech_embeddings=torch.cat(speech_batches, dim=0),
+        text_embeddings=torch.cat(text_batches, dim=0),
+        speech_document_ids=chunk_ids,
+        text_document_ids=chunk_ids,
     )
 
 
@@ -182,7 +198,15 @@ def main() -> None:
     device = torch.device(args.device)
     output_dir = Path(args.output_dir)
 
-    text_chunks = load_text_chunks(args.text_chunks_csv)
+    # Determine le mode : rapide (embeddings pre-calcules) ou complet (text encoder)
+    fast_mode = bool(args.precomputed_text_npy and args.precomputed_text_manifest)
+    if fast_mode:
+        print("[INFO] Mode RAPIDE : embeddings texte pre-calcules (pas de text encoder au training)")
+    else:
+        print("[INFO] Mode COMPLET : text encoder charge a chaque batch (lent sur CPU)")
+        if not args.text_chunks_csv:
+            raise ValueError("--text-chunks-csv requis en mode complet (ou utiliser --precomputed-text-npy).")
+
     audio_store = AudioEmbeddingStore.load(
         manifest_path=args.audio_manifest_csv,
         embeddings_path=args.audio_embeddings_npy,
@@ -194,14 +218,20 @@ def main() -> None:
         val_split=args.val_split,
     )
 
-    tokenizer = AutoTokenizer.from_pretrained(args.text_model_name)
-    collate_fn = build_collate_fn(tokenizer, max_length=args.max_length)
+    if fast_mode:
+        text_store = TextEmbeddingStore.load(
+            manifest_path=args.precomputed_text_manifest,
+            embeddings_path=args.precomputed_text_npy,
+        )
+        tokenizer = None
+        collate_fn = fast_collate
+        train_dataset = FastDualEncoderDataset(train_pairs, audio_store, text_store)
+    else:
+        text_chunks = load_text_chunks(args.text_chunks_csv)
+        tokenizer = AutoTokenizer.from_pretrained(args.text_model_name)
+        collate_fn = build_collate_fn(tokenizer, max_length=args.max_length)
+        train_dataset = DualEncoderDataset(train_pairs, text_chunks, audio_store)
 
-    train_dataset = DualEncoderDataset(
-        pairs=train_pairs,
-        text_chunks=text_chunks,
-        audio_store=audio_store,
-    )
     train_loader = DataLoader(
         train_dataset,
         batch_size=args.batch_size,
@@ -213,25 +243,27 @@ def main() -> None:
 
     val_loader = None
     if val_pairs is not None and not val_pairs.empty:
-        val_dataset = DualEncoderDataset(
-            pairs=val_pairs,
-            text_chunks=text_chunks,
-            audio_store=audio_store,
-        )
+        if fast_mode:
+            val_dataset = FastDualEncoderDataset(val_pairs, audio_store, text_store)
+            val_collate = fast_collate
+        else:
+            val_dataset = DualEncoderDataset(val_pairs, text_chunks, audio_store)
+            val_collate = collate_fn
         val_loader = DataLoader(
             val_dataset,
             batch_size=args.batch_size,
             shuffle=False,
-            collate_fn=collate_fn,
+            collate_fn=val_collate,
             num_workers=args.num_workers,
             pin_memory=False,
         )
 
     model = DualEncoderModel(
-        text_model_name=args.text_model_name,
         audio_input_dim=audio_store.embedding_dim,
         projection_dim=args.projection_dim,
         dropout=args.dropout,
+        text_model_name=None if fast_mode else args.text_model_name,
+        text_input_dim=text_store.embedding_dim if fast_mode else None,
         freeze_text_encoder=args.freeze_text_encoder,
     ).to(device)
 
@@ -289,14 +321,18 @@ def main() -> None:
             optimizer.zero_grad()
 
             audio_embeddings = batch["audio_embeddings"].to(device)
-            input_ids = batch["input_ids"].to(device)
-            attention_mask = batch["attention_mask"].to(device)
 
-            outputs = model(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                audio_embeddings=audio_embeddings,
-            )
+            if fast_mode:
+                outputs = model(
+                    audio_embeddings=audio_embeddings,
+                    text_embeddings=batch["text_embeddings"].to(device),
+                )
+            else:
+                outputs = model(
+                    audio_embeddings=audio_embeddings,
+                    input_ids=batch["input_ids"].to(device),
+                    attention_mask=batch["attention_mask"].to(device),
+                )
             loss = compute_loss(
                 loss_name=args.loss,
                 speech_embeddings=outputs["speech_embeddings"],
@@ -316,7 +352,7 @@ def main() -> None:
         average_loss = running_loss / max(1, n_batches)
 
         if val_loader is not None:
-            metrics = evaluate(model, val_loader, device)
+            metrics = evaluate(model, val_loader, device, fast_mode=fast_mode)
             epoch_bar.set_postfix(
                 loss=f"{average_loss:.4f}",
                 R5=f"{metrics['Recall@5']:.3f}",

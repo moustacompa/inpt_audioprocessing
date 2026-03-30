@@ -1,0 +1,44 @@
+\babel@toc {french}{}\relax 
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Architecture globale}{3}{subsection.1.1}%
+\contentsline {section}{\numberline {2}P1 --- Data Engineer}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Collecte des donnees audio}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Pretraitement audio}{4}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Construction du corpus texte}{5}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Creation des paires audio--document et split}{5}{subsection.2.4}%
+\contentsline {section}{\numberline {3}P2 --- Speech AI Engineer}{7}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Modele Wav2Vec2}{7}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Architecture du SpeechEncoder}{8}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Gestion du chargement audio (soundfile)}{8}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Mean pooling avec masque d'attention}{9}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Outputs de P2}{9}{subsection.3.5}%
+\contentsline {section}{\numberline {4}P3 --- ML Engineer : Dual Encoder}{10}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Architecture du DualEncoderModel}{10}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Mode rapide (pre-calcul des embeddings texte)}{11}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Fonction de perte}{11}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Contrastive Loss (InfoNCE / NT-Xent)}{11}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Triplet Loss}{12}{subsubsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.4}Procedure d'entrainement}{12}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Metriques d'evaluation}{12}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Export des embeddings texte (post-entrainement)}{13}{subsection.4.6}%
+\contentsline {section}{\numberline {5}P4 --- System Integration}{14}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Index FAISS}{14}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}API REST FastAPI}{14}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Interface Gradio}{15}{subsection.5.3}%
+\contentsline {section}{\numberline {6}Pipeline d'execution}{16}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Pipeline automatise (run\_pipeline.bat / .sh)}{16}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Entrainement sur Google Colab / Kaggle}{16}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Verification des metriques}{17}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Integration Snowflake}{18}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Architecture SQL}{18}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Recherche par similarite vectorielle}{18}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Procedure stockee d'inference}{18}{subsection.7.3}%
+\contentsline {section}{\numberline {8}Problemes techniques et solutions}{20}{section.8}%
+\contentsline {section}{\numberline {9}Resultats et evaluation}{21}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Bilan quantitatif global}{21}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Tests systeme}{21}{subsection.9.2}%
+\contentsline {section}{\numberline {10}Conclusion et perspectives}{22}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Bilan}{22}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Perspectives d'amelioration}{22}{subsection.10.2}%
+\contentsline {section}{\numberline {11}Annexe : Structure du projet}{22}{section.11}%
+\contentsline {section}{\numberline {12}References}{23}{section.12}%

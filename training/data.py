@@ -197,3 +197,88 @@ def build_collate_fn(tokenizer: Any, max_length: int):
         }
 
     return collate
+
+
+# ---------------------------------------------------------------------------
+# Mode rapide : embeddings texte pre-calcules (pas de text encoder au training)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class TextEmbeddingStore:
+    """Embeddings texte pre-calcules (symetrique a AudioEmbeddingStore)."""
+    manifest: pd.DataFrame
+    embeddings: np.ndarray
+
+    @classmethod
+    def load(cls, manifest_path: str | Path, embeddings_path: str | Path) -> "TextEmbeddingStore":
+        manifest = _read_csv(Path(manifest_path))
+        if "chunk_id" not in manifest.columns:
+            raise ValueError("text embedding manifest must contain a 'chunk_id' column")
+        embeddings = np.load(embeddings_path)
+        if embeddings.ndim != 2:
+            raise ValueError(f"expected 2D array for text embeddings, got {embeddings.shape}")
+        if len(manifest) != len(embeddings):
+            raise ValueError("text manifest rows must match text embeddings rows")
+        manifest = manifest.copy()
+        if "embedding_index" not in manifest.columns:
+            manifest["embedding_index"] = np.arange(len(manifest), dtype=np.int64)
+        return cls(manifest=manifest, embeddings=embeddings)
+
+    @property
+    def embedding_dim(self) -> int:
+        return int(self.embeddings.shape[1])
+
+    def attach_to_pairs(self, pairs: pd.DataFrame) -> pd.DataFrame:
+        merged = pairs.merge(
+            self.manifest[["chunk_id", "embedding_index"]].rename(
+                columns={"embedding_index": "text_embedding_index"}
+            ),
+            on="chunk_id",
+            how="inner",
+        )
+        if merged.empty:
+            raise ValueError("no pairs matched the text embedding manifest on chunk_id")
+        return merged
+
+
+class FastDualEncoderDataset(Dataset):
+    """Dataset sans tokenisation : utilise des embeddings audio ET texte pre-calcules.
+    Reduit le temps d'entrainement de 20x a 50x sur CPU.
+    """
+
+    def __init__(
+        self,
+        pairs: pd.DataFrame,
+        audio_store: AudioEmbeddingStore,
+        text_store: TextEmbeddingStore,
+    ) -> None:
+        merged = audio_store.attach_to_pairs(pairs)
+        merged = text_store.attach_to_pairs(merged)
+        self.samples = merged.reset_index(drop=True)
+        self.audio_embeddings = audio_store.embeddings
+        self.text_embeddings = text_store.embeddings
+
+    def __len__(self) -> int:
+        return len(self.samples)
+
+    def __getitem__(self, index: int) -> dict[str, Any]:
+        row = self.samples.iloc[index]
+        return {
+            "audio_id": row["audio_id"],
+            "chunk_id": str(row["chunk_id"]),
+            "audio_embedding": torch.tensor(
+                self.audio_embeddings[int(row["embedding_index"])], dtype=torch.float32
+            ),
+            "text_embedding": torch.tensor(
+                self.text_embeddings[int(row["text_embedding_index"])], dtype=torch.float32
+            ),
+        }
+
+
+def fast_collate(batch: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "audio_embeddings": torch.stack([b["audio_embedding"] for b in batch]),
+        "text_embeddings": torch.stack([b["text_embedding"] for b in batch]),
+        "audio_ids": [b["audio_id"] for b in batch],
+        "chunk_ids": [b["chunk_id"] for b in batch],
+    }

@@ -1,0 +1,252 @@
+==============================================================================
+TESTING.txt -- Task list de test de l'application S2R en local
+==============================================================================
+
+
+------------------------------------------------------------------------------
+TACHE 1 -- Verifier l'environnement
+------------------------------------------------------------------------------
+[ ] Python >= 3.10 installe
+    > python --version
+
+[ ] Virtualenv active
+    > .venv\Scripts\activate          (Windows)
+    > source .venv/bin/activate        (Linux/macOS)
+
+[ ] Dependances installees
+    > pip install -r requirements.txt
+
+[ ] Imports critiques OK
+    > python -c "import torch, faiss, gradio, fastapi, transformers; print('OK')"
+
+Attendu : "OK" sans erreur
+
+
+------------------------------------------------------------------------------
+TACHE 2 -- Valider les donnees P1/P2 (validate_handoff)
+------------------------------------------------------------------------------
+[ ] Fichiers requis presents
+    - embeddings/audio_embeddings_index.csv
+    - embeddings/audio_embeddings.npy
+    - data/output/pairs_train.csv
+
+[ ] Lancer la validation
+    > python -m training.validate_handoff \
+        --audio-manifest-csv  embeddings/audio_embeddings_index.csv \
+        --audio-embeddings-npy embeddings/audio_embeddings.npy \
+        --pairs-csv           data/output/pairs_train.csv
+
+Attendu :
+    manifest_rows=4985
+    embedding_shape=(4985, 768)
+    status=manifest_and_embeddings_ok
+    pairs_rows=3988
+    status=pairs_alignment_ok
+
+
+------------------------------------------------------------------------------
+TACHE 3 -- Pre-calculer les embeddings texte (precompute_text.py)
+------------------------------------------------------------------------------
+[ ] Lancer le pre-calcul (MiniLM, une seule fois)
+    > python -m training.precompute_text \
+        --text-chunks-csv data/output/corpus_chunks.csv \
+        --model-name      sentence-transformers/all-MiniLM-L6-v2 \
+        --output-npy      embeddings/precomputed_text.npy \
+        --output-manifest embeddings/precomputed_text_manifest.csv \
+        --batch-size      64
+
+[ ] Verifier les fichiers crees
+    - embeddings/precomputed_text.npy
+    - embeddings/precomputed_text_manifest.csv
+
+Attendu :
+    Shape finale : (N, 384)
+    [OK] Embeddings sauvegardes : embeddings/precomputed_text.npy
+    [OK] Manifest sauvegarde    : embeddings/precomputed_text_manifest.csv
+
+
+------------------------------------------------------------------------------
+TACHE 4 -- Entrainer le Dual Encoder (1 epoque pour tester)
+------------------------------------------------------------------------------
+[ ] Creer le dossier de sortie si absent
+    > mkdir models\dual_encoder_mpnet
+
+[ ] Lancer l'entrainement en mode rapide (1 epoque, batch 32)
+    > python -m training.train_dual_encoder \
+        --precomputed-text-npy      embeddings/precomputed_text.npy \
+        --precomputed-text-manifest embeddings/precomputed_text_manifest.csv \
+        --pairs-csv            data/output/pairs_train.csv \
+        --val-pairs-csv        data/output/pairs_val.csv \
+        --audio-manifest-csv   embeddings/audio_embeddings_index.csv \
+        --audio-embeddings-npy embeddings/audio_embeddings.npy \
+        --output-dir           models/dual_encoder_mpnet \
+        --projection-dim       256 \
+        --epochs               1 \
+        --batch-size           32 \
+        --num-workers          0
+
+[ ] Verifier le checkpoint cree
+    - models/dual_encoder_mpnet/best_model.pt
+
+Attendu :
+    [INFO] Mode RAPIDE : embeddings texte pre-calcules
+    Debut de l'entrainement : 1 epoques | ...
+    [Epoque 1/1] loss=... | Recall@5=... | MRR=...
+    Entrainement termine. Meilleur MRR=... -> models/dual_encoder_mpnet/best_model.pt
+
+
+------------------------------------------------------------------------------
+TACHE 5 -- Exporter les embeddings texte projetes (export_text_embeddings.py)
+------------------------------------------------------------------------------
+[ ] Lancer l'export (applique la text_projection sur les embeddings pre-calcules)
+    > python -m training.export_text_embeddings \
+        --precomputed-text-npy      embeddings/precomputed_text.npy \
+        --precomputed-text-manifest embeddings/precomputed_text_manifest.csv \
+        --text-chunks-csv           data/output/corpus_chunks.csv \
+        --checkpoint                models/dual_encoder_mpnet/best_model.pt \
+        --output-embeddings-npy     embeddings/text_chunk_embeddings.npy \
+        --output-manifest-csv       embeddings/text_chunk_manifest.csv \
+        --batch-size                64
+
+[ ] Verifier les fichiers crees
+    - embeddings/text_chunk_embeddings.npy
+    - embeddings/text_chunk_manifest.csv
+
+Attendu :
+    [INFO] Mode rapide : application de la text_projection...
+    [OK] Embeddings : embeddings/text_chunk_embeddings.npy  shape=(N, 256)
+    [OK] Manifest   : embeddings/text_chunk_manifest.csv    (N lignes)
+
+
+------------------------------------------------------------------------------
+TACHE 6 -- Tester l'inference CLI (inference.py)
+------------------------------------------------------------------------------
+[ ] Lancer l'inference sur un fichier audio de reference
+    > python inference.py \
+        --audio           data/audio_queries/spontaneous-speech-fr-20300.wav \
+        --checkpoint      models/dual_encoder_mpnet/best_model.pt \
+        --text-embeddings embeddings/text_chunk_embeddings.npy \
+        --manifest        embeddings/text_chunk_manifest.csv \
+        --k               5
+
+Attendu :
+    Tableau de 5 resultats avec colonnes : Rang | Score | chunk_id | Texte
+    Scores entre 0 et 1 (similarite cosinus)
+
+
+------------------------------------------------------------------------------
+TACHE 7 -- Tester l'API FastAPI
+------------------------------------------------------------------------------
+[ ] Lancer l'API (Terminal 1)
+    > uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+    Attendu au demarrage :
+        [S2R] Chargement SpeechEncoder (Wav2Vec2)...
+        [S2R] Chargement dual encoder : best_model.pt
+        [S2R] Index pret : N vecteurs | dim=256
+
+[ ] Tester /health (Terminal 2)
+    > curl http://localhost:8000/health
+
+    Attendu :
+        {"status":"ok","dual_encoder_loaded":true,"index_size":N,...}
+
+[ ] Tester /examples
+    > curl http://localhost:8000/examples
+
+    Attendu :
+        {"files":["spontaneous-speech-fr-20300.wav",...],"folder":"..."}
+
+[ ] Tester /search/audio (upload fichier .wav)
+    > curl -X POST http://localhost:8000/search/audio \
+        -F "file=@data/audio_queries/spontaneous-speech-fr-20300.wav" \
+        -F "k=5"
+
+    Attendu :
+        {"results":[{"rank":1,"score":...,"chunk_id":"...","text":"..."},...],
+         "mode":"dual_encoder","query_dim":256,"index_size":N}
+
+[ ] Tester /search/text (recherche par texte)
+    > curl -X POST http://localhost:8000/search/text \
+        -H "Content-Type: application/json" \
+        -d "{\"query\": \"speech audio retrieval customer support\", \"k\": 5}"
+
+    Attendu :
+        {"results":[...],"mode":"text_dual_encoder",...}
+
+[ ] Verifier la documentation Swagger
+    Ouvrir : http://localhost:8000/docs
+    Tester chaque endpoint depuis l'interface interactive
+
+
+------------------------------------------------------------------------------
+TACHE 8 -- Tester l'interface Gradio
+------------------------------------------------------------------------------
+[ ] Lancer la demo (Terminal 1 si API arretee, sinon Terminal 3)
+    > python demo/app.py --checkpoint models/dual_encoder_mpnet/best_model.pt
+
+    Attendu au demarrage :
+        Chargement Wav2Vec2...
+        Chargement dual encoder : best_model.pt
+        Construction index FAISS...
+        Index OK : N documents | dim=256D
+        Running on local URL: http://localhost:7860
+
+[ ] Verifier le panneau de statut
+    - Mode          : "Dual Encoder entraine"
+    - Index FAISS   : N documents
+    - Device        : cpu (ou cuda)
+
+[ ] Tester l'onglet "Recherche vocale"
+    - Charger un exemple depuis la liste deroulante
+      (ex: spontaneous-speech-fr-20300.wav)
+    - Cliquer "Rechercher"
+    Attendu : tableau de 5 resultats avec scores
+
+[ ] Tester l'enregistrement microphone
+    - Cliquer sur l'icone microphone
+    - Parler quelques secondes (en francais ou anglais)
+    - Cliquer "Rechercher"
+    Attendu : tableau de resultats (pertinence variable sans fine-tuning pousse)
+
+[ ] Tester l'onglet "Recherche texte (comparaison)"
+    - Saisir : "anarchism political philosophy movement"
+    - Cliquer "Rechercher"
+    Attendu : chunk_id doc00000_chunk000 dans les premiers resultats
+
+[ ] Verifier la gestion des erreurs
+    - Cliquer "Rechercher" sans audio -> message d'erreur propre
+    - Verifier qu'aucun crash ne se produit
+
+
+------------------------------------------------------------------------------
+RESULTATS ATTENDUS (apres 1 epoque d'entrainement)
+------------------------------------------------------------------------------
+Les metriques seront faibles apres 1 seule epoque (test uniquement).
+Pour des resultats corrects, relancer avec --epochs 20 dans la Tache 4.
+
+    Recall@5  > 0.30   (apres 20 epoques)
+    Recall@10 > 0.45   (apres 20 epoques)
+    MRR       > 0.25   (apres 20 epoques)
+
+
+------------------------------------------------------------------------------
+EXECUTION AUTOMATIQUE (toutes les etapes)
+------------------------------------------------------------------------------
+Windows :
+    > run_pipeline.bat
+
+Windows (sauter l'entrainement si checkpoint deja present) :
+    > run_pipeline.bat --skip-train
+
+Windows (lancer la demo a la fin) :
+    > run_pipeline.bat --skip-train --demo
+
+Windows (lancer l'API a la fin) :
+    > run_pipeline.bat --skip-train --api
+
+Linux/macOS :
+    > bash run_pipeline.sh --demo
+
+
+==============================================================================

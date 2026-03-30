@@ -115,14 +115,21 @@ class SpeechEncoder(nn.Module):
 def _load_wav(audio_path: str, target_sr: int = SAMPLE_RATE) -> torch.Tensor:
     """Charge un fichier audio et le convertit en waveform mono 16 kHz.
 
+    Utilise soundfile au lieu de torchaudio.load pour eviter la dependance
+    torchcodec/FFmpeg (incompatible sur certains environnements Windows).
+
     Retourne
     --------
     Tensor [T]
     """
-    waveform, sr = torchaudio.load(audio_path)
-    if waveform.shape[0] > 1:  # stéréo → mono
+    import soundfile as sf
+    data, sr = sf.read(audio_path, dtype="float32", always_2d=True)
+    # data : (samples, channels) → transpose en (channels, samples)
+    waveform = torch.from_numpy(data.T)
+    if waveform.shape[0] > 1:  # stereo → mono
         waveform = waveform.mean(dim=0, keepdim=True)
     if sr != target_sr:
+        # torchaudio.functional.resample est un op PyTorch pur, pas de backend audio
         waveform = torchaudio.functional.resample(waveform, sr, target_sr)
     return waveform.squeeze(0)  # [T]
 

@@ -1,0 +1,1401 @@
+\documentclass[12pt, a4paper]{article}
+
+% ─────────────────────────────────────────────────────────────
+% Packages
+% ─────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage{enumitem}
+\usepackage{mdframed}
+\usepackage{tcolorbox}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{setspace}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds}
+
+% ─────────────────────────────────────────────────────────────
+% Mise en page
+% ─────────────────────────────────────────────────────────────
+\geometry{
+  top=2.5cm, bottom=2.5cm,
+  left=2.5cm, right=2.5cm,
+  headheight=15pt
+}
+
+% ─────────────────────────────────────────────────────────────
+% Couleurs
+% ─────────────────────────────────────────────────────────────
+\definecolor{navy}{HTML}{0D1B2A}
+\definecolor{blue}{HTML}{1565C0}
+\definecolor{lblue}{HTML}{1E88E5}
+\definecolor{accent}{HTML}{00ACC1}
+\definecolor{silver}{HTML}{ECEFF1}
+\definecolor{dgray}{HTML}{37474F}
+\definecolor{mgray}{HTML}{78909C}
+\definecolor{green}{HTML}{2E7D32}
+\definecolor{orange}{HTML}{E65100}
+\definecolor{codebg}{HTML}{F3F4F6}
+\definecolor{codeframe}{HTML}{D1D5DB}
+
+% ─────────────────────────────────────────────────────────────
+% Listings (code)
+% ─────────────────────────────────────────────────────────────
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{mgray}\itshape,
+  stringstyle=\color{green},
+  frame=single,
+  rulecolor=\color{codeframe},
+  framexleftmargin=8pt,
+  xleftmargin=12pt,
+  numbers=left,
+  numberstyle=\tiny\color{mgray},
+  numbersep=8pt,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=4,
+  showstringspaces=false,
+  captionpos=b,
+  language=Python,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1
+           {ç}{{\c c}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+           {É}{{\'E}}1 {È}{{\`E}}1 {À}{{\`A}}1
+           {→}{{$\rightarrow$}}1
+           {≈}{{$\approx$}}1 {≤}{{$\leq$}}1 {≥}{{$\geq$}}1
+}
+
+% ─────────────────────────────────────────────────────────────
+% tcolorbox styles
+% ─────────────────────────────────────────────────────────────
+\tcbuselibrary{most}
+
+\newtcolorbox{infobox}[1][]{
+  colback=blue!5!white, colframe=blue!60!white,
+  fonttitle=\bfseries\small, title=#1,
+  arc=4pt, boxrule=0.6pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt
+}
+
+\newtcolorbox{resultbox}{
+  colback=green!5!white, colframe=green!50!white,
+  arc=4pt, boxrule=0.6pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt
+}
+
+\newtcolorbox{warningbox}{
+  colback=orange!8!white, colframe=orange!60!white,
+  arc=4pt, boxrule=0.6pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt
+}
+
+% ─────────────────────────────────────────────────────────────
+% En-têtes et pieds de page
+% ─────────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small\textcolor{mgray}{S2R Project --- INPT}}
+\fancyhead[R]{\small\textcolor{mgray}{Rapport Technique Complet}}
+\fancyfoot[C]{\small\textcolor{mgray}{\thepage}}
+\fancyfoot[L]{\small\textcolor{mgray}{Institut National des Postes et Telecommunications}}
+
+% ─────────────────────────────────────────────────────────────
+% Titres des sections
+% ─────────────────────────────────────────────────────────────
+\titleformat{\section}
+  {\Large\bfseries\color{blue}}
+  {\thesection.}{0.6em}{}
+  [\vspace{-4pt}\textcolor{accent}{\rule{\linewidth}{2pt}}\vspace{2pt}]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{lblue}}
+  {\thesubsection}{0.6em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{accent}}
+  {\thesubsubsection}{0.6em}{}
+
+% ─────────────────────────────────────────────────────────────
+% Hyperlinks
+% ─────────────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=accent,
+  citecolor=lblue,
+  pdftitle={Rapport S2R - Pipeline Complet},
+  pdfauthor={INPT Project Team},
+}
+
+% ─────────────────────────────────────────────────────────────
+% Metadonnees
+% ─────────────────────────────────────────────────────────────
+\title{}
+\author{}
+\date{}
+
+% ═════════════════════════════════════════════════════════════
+\begin{document}
+% ═════════════════════════════════════════════════════════════
+
+% ─────────────────────────────────────────────────────────────
+% PAGE DE COUVERTURE
+% ─────────────────────────────────────────────────────────────
+\begin{titlepage}
+  \pagecolor{navy}
+  \begin{center}
+    \vspace*{1.8cm}
+
+    \begin{tikzpicture}
+      \fill[accent] (0,0) circle (1.2cm);
+      \node at (0,0) {\Huge\bfseries\textcolor{white}{S2R}};
+    \end{tikzpicture}
+
+    \vspace{1.0cm}
+
+    {\fontsize{26}{32}\selectfont\bfseries\textcolor{white}{Speech-to-Retrieval System}}
+
+    \vspace{0.4cm}
+
+    {\Large\textcolor{mgray}{Pipeline complet de recherche documentaire par la voix}}
+
+    \vspace{0.8cm}
+
+    \textcolor{accent}{\rule{10cm}{1.5pt}}
+
+    \vspace{0.6cm}
+
+    {\large\bfseries\textcolor{accent}{Rapport Technique --- Pipeline P1 $\rightarrow$ P4}}
+
+    \vspace{1.6cm}
+
+    {\large\bfseries\textcolor{white}{P1 Data Engineer \;|\; P2 Speech AI Engineer}}
+    \vspace{0.3cm}
+
+    {\large\bfseries\textcolor{white}{P3 ML Engineer \;|\; P4 System Integration}}
+
+    \vspace{0.6cm}
+
+    {\normalsize\textcolor{mgray}{Institut National des Postes et Telecommunications (INPT)}}
+
+    \vspace{0.3cm}
+
+    {\normalsize\textcolor{mgray}{Rabat, Maroc --- 2024--2025}}
+
+    \vspace{1.8cm}
+
+    \begin{tikzpicture}
+      \foreach \i/\lbl/\val in {
+        0/Dataset/4\,985 audios,
+        1/Corpus/6\,744 chunks,
+        2/Modele/Wav2Vec2,
+        3/Espace/dim = 256
+      }{
+        \fill[navy!80!black] (\i*3.8, 0) rectangle (\i*3.8+3.4, 1.3);
+        \draw[accent, line width=0.6pt] (\i*3.8, 0) rectangle (\i*3.8+3.4, 1.3);
+        \node[accent, font=\small\bfseries] at (\i*3.8+1.7, 0.95) {\lbl};
+        \node[white, font=\footnotesize] at (\i*3.8+1.7, 0.35) {\val};
+      }
+    \end{tikzpicture}
+
+    \vfill
+
+    {\small\textcolor{mgray}{Projet Deep Learning --- Rapport genere avec \LaTeX}}
+  \end{center}
+\end{titlepage}
+
+\pagecolor{white}
+
+% ─────────────────────────────────────────────────────────────
+% TABLE DES MATIERES
+% ─────────────────────────────────────────────────────────────
+\tableofcontents
+\newpage
+
+% ═════════════════════════════════════════════════════════════
+\section{Introduction}
+% ═════════════════════════════════════════════════════════════
+
+Ce rapport presente le travail realise dans le cadre du projet
+\textit{Speech-to-Retrieval System (S2R) using Deep Learning}, developpe a l'Institut
+National des Postes et Telecommunications (INPT). Il couvre l'integralite des quatre
+parties du pipeline :
+
+\begin{itemize}[leftmargin=1.5cm]
+  \item \textbf{P1 --- Data Engineer} : preparation du dataset speech $\rightarrow$ document
+  \item \textbf{P2 --- Speech AI Engineer} : encodage vocal sans ASR via Wav2Vec2
+  \item \textbf{P3 --- ML Engineer} : entrainement du Dual Encoder (alignement audio--texte)
+  \item \textbf{P4 --- System Integration} : API REST FastAPI, interface Gradio, deploiement
+\end{itemize}
+
+Un systeme Speech-to-Retrieval (S2R) permet de retrouver des documents textuels pertinents
+a partir d'une requete vocale, \textbf{sans passer par une etape de transcription ASR}.
+L'audio est directement converti en vecteur d'embedding dans un espace semantique partage
+avec les documents textuels, ce qui rend le systeme robuste aux accents et aux langues mixtes.
+
+\begin{table}[H]
+\centering
+\caption{Vue d'ensemble du pipeline S2R}
+\begin{tabularx}{\linewidth}{>{\bfseries}l l l l}
+\toprule
+\rowcolor{navy}\textcolor{white}{Partie} & \textcolor{white}{Module} &
+\textcolor{white}{Role} & \textcolor{white}{Statut} \\
+\midrule
+P1 & \texttt{notebooks/P1\_*.ipynb}        & Donnees audio + texte   & \textcolor{green}{\textbf{\checkmark\ Termine}} \\
+\rowcolor{silver}
+P2 & \texttt{src/speech\_encoder.py}        & Encodage audio Wav2Vec2 & \textcolor{green}{\textbf{\checkmark\ Termine}} \\
+P3 & \texttt{training/}                      & Dual Encoder (InfoNCE)  & \textcolor{green}{\textbf{\checkmark\ Termine}} \\
+\rowcolor{silver}
+P4 & \texttt{api/ + demo/}                  & API FastAPI + Gradio    & \textcolor{green}{\textbf{\checkmark\ Termine}} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Architecture globale}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=0.6cm and 1.4cm,
+  box/.style={rectangle, draw=blue!60, fill=blue!8, rounded corners=4pt,
+              minimum width=4.2cm, minimum height=0.75cm,
+              font=\small, align=center},
+  gbox/.style={rectangle, draw=green!60, fill=green!8, rounded corners=4pt,
+               minimum width=4.2cm, minimum height=0.75cm,
+               font=\small, align=center},
+  arrow/.style={-{Stealth[length=5pt]}, thick, color=accent}
+]
+  % Colonne audio
+  \node[box, fill=navy!85, text=white] (wav) {.wav brut (16 kHz)};
+  \node[box, below=of wav] (w2v) {Wav2Vec2\\(768D, gele)};
+  \node[box, below=of w2v] (aproj) {Audio Projection\\(Linear + Norm L2)};
+  \node[gbox, below=of aproj] (qemb) {Query Embedding\\(256D)};
+
+  % Colonne texte
+  \node[box, right=3.5cm of wav, fill=navy!85, text=white] (txt) {Corpus texte (chunks)};
+  \node[box, below=of txt] (mini) {MiniLM\\(384D, gele)};
+  \node[box, below=of mini] (tproj) {Text Projection\\(Linear + Norm L2)};
+  \node[gbox, below=of tproj] (temb) {Text Embeddings\\(256D)};
+
+  % FAISS
+  \node[gbox, fill=accent!20, draw=accent, below=2.0cm of qemb, xshift=2.6cm]
+    (faiss) {FAISS IndexFlatIP};
+
+  % Resultats
+  \node[gbox, fill=green!15, draw=green!50, below=0.6cm of faiss]
+    (res) {Top-k documents};
+
+  \draw[arrow] (wav)   -- (w2v);
+  \draw[arrow] (w2v)   -- (aproj);
+  \draw[arrow] (aproj) -- (qemb);
+  \draw[arrow] (txt)   -- (mini);
+  \draw[arrow] (mini)  -- (tproj);
+  \draw[arrow] (tproj) -- (temb);
+  \draw[arrow] (qemb)  -- (faiss);
+  \draw[arrow] (temb)  -- (faiss);
+  \draw[arrow] (faiss) -- (res);
+\end{tikzpicture}
+\caption{Architecture complete du systeme Speech-to-Retrieval}
+\label{fig:global}
+\end{figure}
+
+\newpage
+
+% ═════════════════════════════════════════════════════════════
+\section{P1 --- Data Engineer}
+% ═════════════════════════════════════════════════════════════
+
+La partie P1 est responsable de la construction et de la preparation du dataset
+\textit{speech $\rightarrow$ document}. Elle fournit l'ensemble des donnees necessaires
+aux parties P2 et P3.
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Collecte des donnees audio}
+% ─────────────────────────────────────────────────────────────
+
+Les donnees audio ont ete collectees depuis \textbf{openslr/librispeech\_asr}
+(HuggingFace), un dataset anglophone issu de livres audio du domaine public.
+Deux splits ont ete utilises :
+
+\begin{itemize}[leftmargin=1.5cm]
+  \item \textbf{\texttt{train.100}} --- 100 heures d'audio propre, 3\,000 echantillons
+  \item \textbf{\texttt{train.360}} --- 360 heures d'audio propre, 2\,000 echantillons
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Caracteristiques du dataset audio brut}
+\begin{tabularx}{\linewidth}{>{\bfseries\color{blue}}l X}
+\toprule
+Parametre & Valeur \\
+\midrule
+Dataset        & openslr/librispeech\_asr (HuggingFace) \\
+\rowcolor{silver}
+Langue         & Anglais (English) \\
+Splits         & train.100 + train.360 \\
+\rowcolor{silver}
+Format brut    & Divers sample rates (16 kHz, 22 kHz, 44 kHz) \\
+Acces          & Public --- aucune authentification requise \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Pretraitement audio}
+% ─────────────────────────────────────────────────────────────
+
+Chaque fichier audio a subi un pipeline de nettoyage standardise avant d'etre
+sauvegarde en format \textbf{WAV 16\,kHz mono} :
+
+\begin{enumerate}[leftmargin=1.5cm]
+  \item \textbf{Resample} --- Conversion vers 16\,000\,Hz via \texttt{librosa.resample()}
+  \item \textbf{Mono} --- Conversion stereo $\rightarrow$ mono
+  \item \textbf{Filtre duree} --- Rejet des audios $<$ 1\,s, troncature a 20\,s
+  \item \textbf{Filtre SNR} --- Rejet des audios avec SNR $<$ 5\,dB
+  \item \textbf{Normalisation peak} --- Normalisation amplitude a $[-1, 1]$
+\end{enumerate}
+
+\begin{lstlisting}[caption={Estimation du SNR (Signal-to-Noise Ratio)}, label={lst:snr}]
+signal_power = np.mean(waveform ** 2) + 1e-10
+noise_floor  = np.percentile(np.abs(waveform), 10) ** 2 + 1e-10
+snr_db = 10 * np.log10(signal_power / noise_floor)
+if snr_db < MIN_SNR_DB:  # seuil = 5 dB
+    return None  # audio rejete
+\end{lstlisting}
+
+\begin{resultbox}
+\textbf{Resultat :} 4\,985 fichiers WAV acceptes sur 5\,000 cibles (99.7\%).
+Les 15 fichiers rejetes presentaient un SNR insuffisant ou une duree trop courte.
+\end{resultbox}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Construction du corpus texte}
+% ─────────────────────────────────────────────────────────────
+
+Le corpus textuel a ete construit a partir d'articles Wikipedia en anglais via
+\textbf{wikimedia/wikipedia (20231101.en)} : 600 articles telecharges en streaming,
+filtrage des articles $<$ 150 mots, \textbf{570 articles retenus}.
+
+Chaque article a ete decoupe en chunks de \textbf{512 tokens} avec un overlap de
+\textbf{50 tokens} (fenetre glissante) :
+
+\begin{lstlisting}[caption={Pipeline de chunking avec fenetre glissante}]
+tokenizer = AutoTokenizer.from_pretrained(
+    "sentence-transformers/all-mpnet-base-v2"
+)
+tokens = tokenizer.encode(document_text, add_special_tokens=False)
+chunk_size, overlap = 512, 50
+for start in range(0, len(tokens), chunk_size - overlap):
+    end   = min(start + chunk_size, len(tokens))
+    chunk = tokenizer.decode(tokens[start:end])
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\caption{Statistiques du corpus texte}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Metrique} & \textbf{Valeur} & \textbf{Unite} \\
+\midrule
+Total chunks produits  & 6\,744  & chunks \\
+\rowcolor{silver}
+Articles source        & 570     & documents \\
+Tokens moyens/chunk    & 493     & tokens \\
+\rowcolor{silver}
+Taille fichier CSV     & 15\,719 & KB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Creation des paires audio--document et split}
+% ─────────────────────────────────────────────────────────────
+
+Chaque fichier audio est associe au chunk texte le plus pertinent via la
+\textbf{similarite de Jaccard} sur les mots-cles :
+
+\begin{equation}
+  J(A, B) = \frac{|KW(A) \cap KW(B)|}{|KW(A) \cup KW(B)|}
+\end{equation}
+
+\begin{infobox}[Score Jaccard moyen : 0.073]
+Score faible attendu : les transcriptions LibriSpeech sont des phrases courtes
+tandis que les chunks Wikipedia sont des paragraphes techniques denses.
+Les paires servent uniquement a l'entrainement contrastif de P3.
+\end{infobox}
+
+\begin{table}[H]
+\centering
+\caption{Repartition train / val / test (strategie 80/10/10)}
+\begin{tabular}{lrrr}
+\toprule
+\rowcolor{navy}
+\textcolor{white}{\textbf{Split}} &
+\textcolor{white}{\textbf{Paires}} &
+\textcolor{white}{\textbf{Proportion}} &
+\textcolor{white}{\textbf{Fichier}} \\
+\midrule
+Train      & 3\,988 & 80\% & \texttt{pairs\_train.csv} \\
+\rowcolor{silver}
+Validation & 498    & 10\% & \texttt{pairs\_val.csv} \\
+Test       & 499    & 10\% & \texttt{pairs\_test.csv} \\
+\midrule
+\rowcolor{silver}
+\textbf{Total} & \textbf{4\,985} & \textbf{100\%} & \texttt{pairs.csv} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\newpage
+
+% ═════════════════════════════════════════════════════════════
+\section{P2 --- Speech AI Engineer}
+% ═════════════════════════════════════════════════════════════
+
+La partie P2 transforme les fichiers audio en vecteurs d'embeddings denses de dimension
+\textbf{768}, normalises L2, directement exploitables par le Dual Encoder de P3.
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Modele Wav2Vec2}
+% ─────────────────────────────────────────────────────────────
+
+Le modele utilise est \textbf{facebook/wav2vec2-base-960h}, pre-entraine par Meta AI
+sur 960 heures d'audio anglais (LibriSpeech). C'est un Transformer auto-supervise
+qui apprend des representations speech riches sans supervision explicite.
+
+\begin{table}[H]
+\centering
+\caption{Parametres du modele Wav2Vec2}
+\begin{tabular}{>{\bfseries\color{blue}}l l l}
+\toprule
+Parametre & Valeur & Description \\
+\midrule
+Modele       & wav2vec2-base-960h & Version base \\
+\rowcolor{silver}
+Parametres   & 94M               & Total parametres \\
+Sample rate  & 16\,000 Hz        & Format audio requis \\
+\rowcolor{silver}
+Hidden dim   & 768               & Dimension des hidden states \\
+Nb couches   & 12                & Transformer layers \\
+\rowcolor{silver}
+Nb tetes     & 12                & Attention heads \\
+Poids        & Geles             & \texttt{frozen=True} pendant training \\
+\rowcolor{silver}
+Pooling      & Mean              & Moyenne sur dimension temporelle \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Architecture du SpeechEncoder}
+% ─────────────────────────────────────────────────────────────
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.0cm,
+  box/.style={rectangle, draw=blue!60, fill=blue!8, rounded corners=4pt,
+              minimum width=7cm, minimum height=0.75cm,
+              font=\small, align=center},
+  arrow/.style={-{Stealth[length=6pt]}, thick, color=accent}
+]
+  \node[box, fill=navy!90, text=white, font=\small\bfseries] (in)
+    {Fichier .wav (16 kHz, mono, float32)};
+  \node[box, below=of in] (step1)
+    {Chargement via soundfile (sans FFmpeg)};
+  \node[box, below=of step1] (step2)
+    {Feature extraction --- Wav2Vec2Processor};
+  \node[box, below=of step2] (step3)
+    {Encodage --- Wav2Vec2Model (12 layers)};
+  \node[box, below=of step3, font=\small\itshape] (step3b)
+    {hidden states $\in \mathbb{R}^{B \times T' \times 768}$};
+  \node[box, below=of step3b] (step4)
+    {Mean pooling temporel (avec masque optionnel)};
+  \node[box, fill=green!15, draw=green!50, below=of step4, font=\small\bfseries] (out)
+    {Embedding norme L2 $\in \mathbb{R}^{768}$};
+  \draw[arrow] (in) -- (step1);
+  \draw[arrow] (step1) -- (step2);
+  \draw[arrow] (step2) -- (step3);
+  \draw[arrow] (step3) -- (step3b);
+  \draw[arrow] (step3b) -- (step4);
+  \draw[arrow] (step4) -- (out);
+\end{tikzpicture}
+\caption{Pipeline d'encodage audio P2}
+\label{fig:p2pipeline}
+\end{figure}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Gestion du chargement audio (soundfile)}
+% ─────────────────────────────────────────────────────────────
+
+Sur Windows, la dependance \texttt{torchaudio.load} requiert FFmpeg via
+\texttt{torchcodec}, ce qui genere des erreurs sur certains environnements.
+La solution adoptee utilise directement \textbf{soundfile} :
+
+\begin{lstlisting}[caption={Chargement audio robuste (src/speech\_encoder.py)}]
+import soundfile as sf
+
+def _load_wav(audio_path, target_sr=16_000):
+    data, sr = sf.read(audio_path, dtype="float32", always_2d=True)
+    waveform = torch.from_numpy(data.T)  # (channels, samples)
+    if waveform.shape[0] > 1:            # stereo -> mono
+        waveform = waveform.mean(dim=0, keepdim=True)
+    if sr != target_sr:
+        # torchaudio.functional.resample = op PyTorch pur, sans backend
+        waveform = torchaudio.functional.resample(waveform, sr, target_sr)
+    return waveform.squeeze(0)           # [T]
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Mean pooling avec masque d'attention}
+% ─────────────────────────────────────────────────────────────
+
+Pour les batches paddes, un masque d'attention est propage jusqu'a la sortie
+du feature extractor pour un pooling correct :
+
+\begin{equation}
+  \mathbf{e} = \frac{\sum_{t=1}^{T'} \mathbf{h}_t \cdot m_t}{\sum_{t=1}^{T'} m_t}
+  \qquad m_t \in \{0, 1\}
+\end{equation}
+
+La normalisation L2 finale garantit $\|\mathbf{e}\|_2 = 1$, rendant la similarite
+cosine equivalente au produit scalaire, ce qui est optimal pour FAISS IndexFlatIP.
+
+\begin{equation}
+  \hat{\mathbf{e}} = \frac{\mathbf{e}}{\|\mathbf{e}\|_2}
+  \implies \cos(\hat{\mathbf{e}}_1, \hat{\mathbf{e}}_2) = \hat{\mathbf{e}}_1^\top \hat{\mathbf{e}}_2
+\end{equation}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Outputs de P2}
+% ─────────────────────────────────────────────────────────────
+
+\begin{table}[H]
+\centering
+\caption{Fichiers produits par P2}
+\begin{tabularx}{\linewidth}{>{\ttfamily}l l X}
+\toprule
+\textbf{Fichier} & \textbf{Dimensions} & \textbf{Description} \\
+\midrule
+audio\_embeddings.npy        & $(4985, 768)$ & Matrice des embeddings Wav2Vec2 \\
+\rowcolor{silver}
+audio\_embeddings\_index.csv  & 4985 lignes  & Mapping audio\_id $\rightarrow$ ligne \\
+src/speech\_encoder.py        & ---          & Module importable par P3/P4 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\newpage
+
+% ═════════════════════════════════════════════════════════════
+\section{P3 --- ML Engineer : Dual Encoder}
+% ═════════════════════════════════════════════════════════════
+
+La partie P3 entraine un \textbf{Dual Encoder} qui aligne l'espace audio (768D) et
+l'espace texte (384D) dans un espace commun partage de dimension \textbf{256D},
+via une fonction de perte contrastive.
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Architecture du DualEncoderModel}
+% ─────────────────────────────────────────────────────────────
+
+Le modele est compose de deux branches de projection symetriques :
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=0.8cm and 2.0cm,
+  box/.style={rectangle, draw=blue!60, fill=blue!8, rounded corners=4pt,
+              minimum width=3.8cm, minimum height=0.7cm,
+              font=\small, align=center},
+  gbox/.style={rectangle, draw=green!60, fill=green!8, rounded corners=4pt,
+               minimum width=3.8cm, minimum height=0.7cm,
+               font=\small, align=center},
+  arrow/.style={-{Stealth[length=5pt]}, thick, color=accent}
+]
+  % Branche audio
+  \node[box, fill=navy!85, text=white] (a0) {Wav2Vec2 embedding\\$\mathbb{R}^{768}$ (gele)};
+  \node[box, below=of a0] (a1) {Dropout($p=0.1$)};
+  \node[box, below=of a1] (a2) {Linear($768 \to 256$)};
+  \node[gbox, below=of a2] (az) {$z_s \in \mathbb{R}^{256}$, L2-norme};
+
+  % Branche texte
+  \node[box, fill=navy!85, text=white, right=2.5cm of a0] (t0) {MiniLM embedding\\$\mathbb{R}^{384}$ (pre-calcule)};
+  \node[box, below=of t0] (t1) {Dropout($p=0.1$)};
+  \node[box, below=of t1] (t2) {Linear($384 \to 256$)};
+  \node[gbox, below=of t2] (tz) {$z_t \in \mathbb{R}^{256}$, L2-norme};
+
+  % Similarite
+  \node[gbox, fill=accent!20, draw=accent, below=1.2cm of a2, xshift=2.6cm]
+    (sim) {$\text{sim}(z_s, z_t) = z_s^\top z_t$};
+
+  \draw[arrow] (a0) -- (a1);
+  \draw[arrow] (a1) -- (a2);
+  \draw[arrow] (a2) -- (az);
+  \draw[arrow] (t0) -- (t1);
+  \draw[arrow] (t1) -- (t2);
+  \draw[arrow] (t2) -- (tz);
+  \draw[arrow] (az)  -- (sim);
+  \draw[arrow] (tz)  -- (sim);
+\end{tikzpicture}
+\caption{Architecture du DualEncoderModel (mode rapide)}
+\label{fig:dualenc}
+\end{figure}
+
+\begin{lstlisting}[caption={DualEncoderModel simplifie (training/models.py)}]
+class DualEncoderModel(nn.Module):
+    def __init__(self, audio_input_dim=768, projection_dim=256,
+                 dropout=0.1, text_input_dim=384):
+        super().__init__()
+        self.text_encoder = None  # mode rapide
+        self.audio_projection = nn.Sequential(
+            nn.Dropout(dropout),
+            nn.Linear(audio_input_dim, projection_dim),
+        )
+        self.text_projection = nn.Sequential(
+            nn.Dropout(dropout),
+            nn.Linear(text_input_dim, projection_dim),
+        )
+
+    def encode_audio(self, x):
+        return F.normalize(self.audio_projection(x), p=2, dim=-1)
+
+    def encode_text_precomputed(self, x):
+        return F.normalize(self.text_projection(x), p=2, dim=-1)
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Mode rapide (pre-calcul des embeddings texte)}
+% ─────────────────────────────────────────────────────────────
+
+Sur CPU, encoder MiniLM a chaque batch pendant l'entrainement serait prohibitif.
+La solution adoptee est le \textbf{mode rapide} :
+
+\begin{enumerate}[leftmargin=1.5cm]
+  \item Pre-calculer \textit{une seule fois} tous les embeddings MiniLM (384D) en
+        \texttt{embeddings/precomputed\_text.npy}
+  \item Pendant l'entrainement, charger ces vecteurs depuis la memoire (numpy array)
+  \item Uniquement les deux couches \texttt{Linear} sont entrainables
+\end{enumerate}
+
+\begin{table}[H]
+\centering
+\caption{Comparaison mode complet vs mode rapide}
+\begin{tabular}{lll}
+\toprule
+\textbf{Critere} & \textbf{Mode complet} & \textbf{Mode rapide} \\
+\midrule
+Forward text/batch & MiniLM complet & Lookup numpy \\
+\rowcolor{silver}
+Temps/epoque (CPU) & $\sim$30 min    & $\sim$45 secondes \\
+Parametres entrain. & 22M (MPNet)   & \textbf{2 couches Linear} \\
+\rowcolor{silver}
+Requiert GPU       & Oui            & Non \\
+Speedup            & 1$\times$      & \textbf{20--50$\times$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{resultbox}
+\textbf{Acceleration mesuree sur Intel Core i7, 24 Go RAM :}
+mode complet $\approx$ 2h20/epoque $\rightarrow$ mode rapide $\approx$ 45 sec/epoque.
+Entrainement complet de 20 epoques ramene de $\approx$ 2 jours a $\approx$ 15 minutes.
+\end{resultbox}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Fonction de perte}
+% ─────────────────────────────────────────────────────────────
+
+Deux fonctions de perte sont implementees dans \texttt{training/losses.py}.
+
+\subsubsection{Contrastive Loss (InfoNCE / NT-Xent)}
+
+Pour un batch de $N$ paires $(z_s^{(i)}, z_t^{(i)})$, la matrice de similarites est :
+
+\begin{equation}
+  S_{ij} = \frac{z_s^{(i)} \cdot z_t^{(j)}}{\tau}, \quad \tau = 0.07
+\end{equation}
+
+La perte InfoNCE penalise les similarites hors-diagonale (negatifs in-batch) :
+
+\begin{equation}
+  \mathcal{L} =
+  \frac{1}{2}
+  \left(
+    \underbrace{\frac{1}{N}\sum_{i=1}^{N} -\log \frac{e^{S_{ii}}}{\sum_j e^{S_{ij}}}}_{\mathcal{L}_{s \to t}}
+    +
+    \underbrace{\frac{1}{N}\sum_{i=1}^{N} -\log \frac{e^{S_{ii}}}{\sum_j e^{S_{ji}}}}_{\mathcal{L}_{t \to s}}
+  \right)
+\end{equation}
+
+\begin{lstlisting}[caption={Contrastive loss (InfoNCE) -- training/losses.py}]
+def contrastive_loss(speech_emb, text_emb, temperature=0.07):
+    logits = (speech_emb @ text_emb.T) / temperature
+    labels = torch.arange(logits.size(0), device=logits.device)
+    loss_s2t = F.cross_entropy(logits,   labels)
+    loss_t2s = F.cross_entropy(logits.T, labels)
+    return (loss_s2t + loss_t2s) / 2.0
+\end{lstlisting}
+
+\subsubsection{Triplet Loss}
+
+Comme alternative, une triplet loss avec hard-negative mining est disponible :
+
+\begin{equation}
+  \mathcal{L}_{triplet} = \frac{1}{2}\Big(
+  \text{ReLU}\!\left(d^+ - d^-_{text} + m\right)
+  + \text{ReLU}\!\left(d^+ - d^-_{speech} + m\right)
+  \Big)
+\end{equation}
+
+avec $d^+ = 1 - \text{sim}(z_s^{(i)}, z_t^{(i)})$ et $m = 0.2$.
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Procedure d'entrainement}
+% ─────────────────────────────────────────────────────────────
+
+\begin{table}[H]
+\centering
+\caption{Hyperparametres d'entrainement recommandes}
+\begin{tabular}{>{\bfseries}l l l}
+\toprule
+Parametre & Valeur locale (CPU) & Valeur cloud (GPU T4) \\
+\midrule
+Epoques          & 20      & 20 \\
+\rowcolor{silver}
+Batch size       & 16      & 64 \\
+Learning rate    & 2e-4    & 2e-4 \\
+\rowcolor{silver}
+Warmup steps     & 100     & 100 \\
+Grad clipping    & 1.0     & 1.0 \\
+\rowcolor{silver}
+Projection dim   & 256     & 256 \\
+Temperature      & 0.07    & 0.07 \\
+\rowcolor{silver}
+Optimiseur       & AdamW   & AdamW \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Le scheduler de learning rate combine un warmup lineaire sur les premiers 100 steps
+puis un decroissance cosine jusqu'a la fin de l'entrainement.
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Metriques d'evaluation}
+% ─────────────────────────────────────────────────────────────
+
+Trois metriques sont calculees a chaque epoque de validation
+dans \texttt{training/metrics.py} :
+
+\begin{itemize}[leftmargin=1.5cm]
+  \item \textbf{Recall@k} : proportion de requetes pour lesquelles le document correct
+        apparait dans le top-$k$ (k = 5 et 10)
+
+  \begin{equation}
+    \text{Recall@}k = \frac{1}{|Q|}\sum_{q \in Q} \mathbf{1}\left[\text{rank}(q) \leq k\right]
+  \end{equation}
+
+  \item \textbf{MRR} (Mean Reciprocal Rank) : moyenne des inverses du rang du premier
+        document pertinent
+
+  \begin{equation}
+    \text{MRR} = \frac{1}{|Q|}\sum_{q \in Q} \frac{1}{\text{rank}(q)}
+  \end{equation}
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Objectifs de performance apres 20 epoques}
+\begin{tabular}{lll}
+\toprule
+\textbf{Metrique} & \textbf{Objectif} & \textbf{Interpretation} \\
+\midrule
+Recall@5  & $> 0.30$ & 30\% des requetes trouvees dans le top-5 \\
+\rowcolor{silver}
+Recall@10 & $> 0.45$ & 45\% des requetes trouvees dans le top-10 \\
+MRR       & $> 0.25$ & rang moyen reciproque du document correct \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{infobox}[Limitation intrinseque du dataset]
+Les paires audio--document sont construites par similarite Jaccard (score moy. 0.073).
+Les paires ne sont pas semantiquement parfaites : les metriques mesurent la capacite
+du modele a retrouver ces paires imparfaites, pas la qualite semantique absolue.
+\end{infobox}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Export des embeddings texte (post-entrainement)}
+% ─────────────────────────────────────────────────────────────
+
+Apres l'entrainement, \texttt{training/export\_text\_embeddings.py} projette
+tous les chunks texte dans l'espace commun 256D :
+
+\begin{enumerate}[leftmargin=1.5cm]
+  \item Charger les embeddings pre-calcules (384D) depuis \texttt{precomputed\_text.npy}
+  \item Appliquer \texttt{model.encode\_text\_precomputed()} par batch de 64
+  \item Sauvegarder la matrice $(N, 256)$ dans \texttt{text\_chunk\_embeddings.npy}
+  \item Sauvegarder le manifest (\texttt{chunk\_id}, \texttt{document\_id}, \texttt{text})
+\end{enumerate}
+
+\newpage
+
+% ═════════════════════════════════════════════════════════════
+\section{P4 --- System Integration}
+% ═════════════════════════════════════════════════════════════
+
+La partie P4 expose le systeme S2R via deux interfaces :
+une \textbf{API REST FastAPI} pour l'integration backend,
+et une \textbf{interface Gradio} pour la demonstration interactive.
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Index FAISS}
+% ─────────────────────────────────────────────────────────────
+
+La recherche des documents pertinents est effectuee via
+\textbf{FAISS IndexFlatIP} (produit scalaire exact sur vecteurs normalises = cosine similarity).
+L'index est construit en memoire au demarrage :
+
+\begin{lstlisting}[caption={Construction de l'index FAISS (api/main.py)}]
+embs = np.load("embeddings/text_chunk_embeddings.npy").astype("float32")
+norms = np.linalg.norm(embs, axis=1, keepdims=True)
+embs /= np.clip(norms, 1e-9, None)          # normalisation L2
+
+index = faiss.IndexFlatIP(embs.shape[1])     # dim = 256
+index.add(embs)                              # N vecteurs indexes
+# Recherche : scores, indices = index.search(query, k)
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{API REST FastAPI}
+% ─────────────────────────────────────────────────────────────
+
+L'API expose 5 endpoints documentes via Swagger (disponible sur \texttt{/docs}) :
+
+\begin{table}[H]
+\centering
+\caption{Endpoints de l'API FastAPI (api/main.py)}
+\begin{tabularx}{\linewidth}{l l X}
+\toprule
+\textbf{Methode} & \textbf{Route} & \textbf{Description} \\
+\midrule
+GET  & \texttt{/health}        & Etat du service (dual encoder charge, taille index) \\
+\rowcolor{silver}
+POST & \texttt{/search/audio}  & Upload fichier .wav $\to$ top-k documents \\
+POST & \texttt{/search/base64} & Audio encode base64 $\to$ top-k documents \\
+\rowcolor{silver}
+POST & \texttt{/search/text}   & Requete texte (MiniLM) $\to$ top-k documents \\
+GET  & \texttt{/examples}      & Liste des fichiers audio de demonstration \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{lstlisting}[caption={Exemple de reponse /search/audio}]
+{
+  "results": [
+    {"rank": 1, "score": 0.8241, "chunk_id": "doc00042_chunk003",
+     "text": "Anarchism is a political philosophy..."},
+    {"rank": 2, "score": 0.7955, "chunk_id": "doc00042_chunk004",
+     "text": "The anarchist movement emerged..."}
+  ],
+  "mode": "dual_encoder",
+  "query_dim": 256,
+  "index_size": 6744
+}
+\end{lstlisting}
+
+Lancement de l'API :
+
+\begin{lstlisting}[language=bash, caption={Lancement de l'API FastAPI}]
+# Variables d'environnement (optionnelles)
+export S2R_CHECKPOINT="models/dual_encoder_mpnet/best_model.pt"
+export S2R_TEXT_EMBEDDINGS="embeddings/text_chunk_embeddings.npy"
+export S2R_MANIFEST="embeddings/text_chunk_manifest.csv"
+
+# Demarrage
+uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+# Documentation interactive : http://localhost:8000/docs
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Interface Gradio}
+% ─────────────────────────────────────────────────────────────
+
+L'interface Gradio (\texttt{demo/app.py}) propose deux onglets :
+
+\begin{itemize}[leftmargin=1.5cm]
+  \item \textbf{Onglet 1 --- Recherche vocale} : upload ou enregistrement microphone,
+        slider pour le nombre de resultats, liste deroulante d'exemples pre-charges
+  \item \textbf{Onglet 2 --- Recherche texte} : saisie textuelle directe,
+        comparaison avec le mode audio pour valider l'index
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Options de lancement de la demo Gradio}
+\begin{tabular}{l l}
+\toprule
+\textbf{Commande} & \textbf{Description} \\
+\midrule
+\texttt{python demo/app.py} & Mode prototype (Wav2Vec2 brut) \\
+\rowcolor{silver}
+\texttt{python demo/app.py --checkpoint best\_model.pt} & Dual encoder entraine \\
+\texttt{python demo/app.py --share} & Lien public Gradio (72h) \\
+\rowcolor{silver}
+\texttt{python demo/app.py --port 7861} & Port personnalise \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Au demarrage, la demo affiche un panneau de statut indiquant le mode actif
+(prototype ou dual encoder entraine), la taille de l'index FAISS, et le device utilise.
+
+\newpage
+
+% ═════════════════════════════════════════════════════════════
+\section{Pipeline d'execution}
+% ═════════════════════════════════════════════════════════════
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Pipeline automatise (run\_pipeline.bat / .sh)}
+% ─────────────────────────────────────────────────────────────
+
+Deux scripts d'automatisation complets sont fournis pour Windows et Linux/macOS.
+Le pipeline s'execute en 6 etapes sequentielles :
+
+\begin{table}[H]
+\centering
+\caption{Etapes du pipeline automatise}
+\begin{tabularx}{\linewidth}{c l X}
+\toprule
+\textbf{Etape} & \textbf{Module} & \textbf{Action} \\
+\midrule
+1 & \texttt{validate\_handoff} & Verification des donnees P1/P2 \\
+\rowcolor{silver}
+2 & \texttt{precompute\_text}  & Pre-calcul embeddings MiniLM (une fois) \\
+3 & \texttt{train\_dual\_encoder} & Entrainement 20 epoques, batch 16 \\
+\rowcolor{silver}
+4 & \texttt{export\_text\_embeddings} & Export embeddings 256D vers FAISS \\
+5 & \texttt{inference.py}     & Test d'inference sur un fichier exemple \\
+\rowcolor{silver}
+6 & API ou Demo (optionnel)   & Lancement selon \texttt{--api} ou \texttt{--demo} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{lstlisting}[language=bash, caption={Options du pipeline Windows}]
+run_pipeline.bat                    # Pipeline complet (20 epoques)
+run_pipeline.bat --skip-train       # Sauter l'entrainement (checkpoint present)
+run_pipeline.bat --skip-train --demo  # Sauter + lancer Gradio
+run_pipeline.bat --skip-train --api   # Sauter + lancer FastAPI
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Entrainement sur Google Colab / Kaggle}
+% ─────────────────────────────────────────────────────────────
+
+Un notebook Jupyter complet est fourni dans \texttt{notebooks/S2R\_Colab\_Kaggle.ipynb}
+pour l'entrainement sur GPU cloud :
+
+\begin{table}[H]
+\centering
+\caption{Performances d'entrainement selon la plateforme}
+\begin{tabular}{llll}
+\toprule
+\textbf{Plateforme} & \textbf{GPU} & \textbf{Temps/epoque} & \textbf{20 epoques} \\
+\midrule
+Local (Intel i7, CPU) & Aucun    & $\approx$ 45 s & $\approx$ 15 min \\
+\rowcolor{silver}
+Google Colab (gratuit) & T4 15GB & $\approx$ 60 s & $\approx$ 20 min \\
+Kaggle (gratuit)       & T4 16GB & $\approx$ 55 s & $\approx$ 18 min \\
+\rowcolor{silver}
+Google Colab Pro       & A100 40GB & $\approx$ 20 s & $\approx$ 7 min \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Le notebook couvre : installation des dependances, chargement depuis Google Drive
+ou upload direct, validation des donnees, pre-calcul MiniLM, entrainement avec
+tqdm progress, evaluation, et telechargement du checkpoint.
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Verification des metriques}
+% ─────────────────────────────────────────────────────────────
+
+\begin{lstlisting}[caption={Validation des donnees P1/P2 (training/validate\_handoff.py)}]
+python -m training.validate_handoff \
+    --audio-manifest-csv  embeddings/audio_embeddings_index.csv \
+    --audio-embeddings-npy embeddings/audio_embeddings.npy \
+    --pairs-csv           data/output/pairs_train.csv
+
+# Attendu :
+# manifest_rows=4985
+# embedding_shape=(4985, 768)
+# status=manifest_and_embeddings_ok
+# pairs_rows=3988
+# status=pairs_alignment_ok
+\end{lstlisting}
+
+\newpage
+
+% ═════════════════════════════════════════════════════════════
+\section{Integration Snowflake}
+% ═════════════════════════════════════════════════════════════
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Architecture SQL}
+% ─────────────────────────────────────────────────────────────
+
+Un pipeline SQL complet pour Snowflake est fourni dans \texttt{snowflake\_pipeline.sql}.
+Il exploite le type natif \textbf{VECTOR(FLOAT, 256)} de Snowflake
+et la fonction \textbf{VECTOR\_COSINE\_SIMILARITY} pour la recherche.
+
+\begin{table}[H]
+\centering
+\caption{Tables principales du pipeline Snowflake}
+\begin{tabularx}{\linewidth}{>{\ttfamily}l X}
+\toprule
+\textbf{Table} & \textbf{Description} \\
+\midrule
+AUDIO\_EMBEDDINGS   & Embeddings audio 256D + metadonnees (\texttt{audio\_id}, \texttt{filepath}) \\
+\rowcolor{silver}
+TEXT\_EMBEDDINGS    & Embeddings texte 256D + contenu des chunks \\
+AUDIO\_QUERIES      & Requetes audio de test \\
+\rowcolor{silver}
+RETRIEVAL\_RESULTS  & Resultats de recherche avec scores et rangs \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{lstlisting}[language=SQL, caption={Schema de la table TEXT\_EMBEDDINGS dans Snowflake}]
+CREATE TABLE S2R_DB.S2R_SCHEMA.TEXT_EMBEDDINGS (
+    chunk_id      VARCHAR(255) NOT NULL PRIMARY KEY,
+    document_id   VARCHAR(255),
+    text_content  TEXT,
+    embedding     VECTOR(FLOAT, 256),      -- type natif Snowflake
+    loaded_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+);
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Recherche par similarite vectorielle}
+% ─────────────────────────────────────────────────────────────
+
+\begin{lstlisting}[language=SQL, caption={Recherche top-5 dans Snowflake}]
+SELECT
+    t.chunk_id,
+    t.document_id,
+    LEFT(t.text_content, 300) AS text_preview,
+    VECTOR_COSINE_SIMILARITY(t.embedding, q.embedding) AS score
+FROM S2R_DB.S2R_SCHEMA.TEXT_EMBEDDINGS t
+CROSS JOIN (
+    SELECT embedding FROM S2R_DB.S2R_SCHEMA.AUDIO_QUERIES
+    WHERE audio_id = 'spontaneous-speech-fr-20300'
+) q
+ORDER BY score DESC
+LIMIT 5;
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Procedure stockee d'inference}
+% ─────────────────────────────────────────────────────────────
+
+Une procedure stockee Snowpark integre le modele Python directement dans Snowflake :
+
+\begin{lstlisting}[language=SQL, caption={Procedure d'inference S2R dans Snowflake}]
+CREATE OR REPLACE PROCEDURE S2R_DB.S2R_SCHEMA.S2R_SEARCH(
+    AUDIO_PATH VARCHAR,
+    K INTEGER
+)
+RETURNS TABLE(chunk_id VARCHAR, score FLOAT, text_preview VARCHAR)
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.10'
+PACKAGES = ('torch', 'transformers', 'soundfile', 'numpy', 'faiss-cpu')
+HANDLER = 's2r_search'
+AS $$
+def s2r_search(session, audio_path, k):
+    import numpy as np
+    from src.speech_encoder import speech_to_embedding
+    emb = speech_to_embedding(audio_path)
+    # ... recherche dans la table TEXT_EMBEDDINGS
+$$;
+\end{lstlisting}
+
+\newpage
+
+% ═════════════════════════════════════════════════════════════
+\section{Problemes techniques et solutions}
+% ═════════════════════════════════════════════════════════════
+
+Cette section documente les problemes rencontres pendant le developpement et
+les corrections apportees.
+
+\begin{table}[H]
+\centering
+\caption{Problemes techniques et corrections}
+\begin{tabularx}{\linewidth}{p{4.5cm} p{3.5cm} X}
+\toprule
+\textbf{Probleme} & \textbf{Cause} & \textbf{Solution} \\
+\midrule
+\texttt{RuntimeError: libtorchcodec} &
+FFmpeg manquant sur Windows &
+Remplacement de \texttt{torchaudio.load} par \texttt{soundfile.read} \\
+
+\rowcolor{silver}
+\texttt{unrecognized arguments: --text-chunks-csv} &
+Argument absent de \texttt{validate\_handoff.py} &
+Suppression de l'argument des appels au script \\
+
+\texttt{audio\_id column not found} &
+Colonne nommee \texttt{audio\_file} dans certains CSVs &
+Normalisation automatique \texttt{audio\_file} $\to$ \texttt{audio\_id} \\
+
+\rowcolor{silver}
+\texttt{missing column: document\_id} &
+Colonne absent de \texttt{corpus\_chunks.csv} &
+Derivation automatique depuis \texttt{chunk\_id} (regex) \\
+
+Segfault DataLoader (Windows) &
+Multiprocessing incompatible &
+\texttt{num\_workers=0, pin\_memory=False} \\
+
+\rowcolor{silver}
+.bat non reconnu &
+Caracteres accentues (UTF-8) dans \texttt{cmd.exe} &
+Reecriture du .bat en ASCII pur, suppression de \texttt{chcp} \\
+
+Temps d'entrainement $>$ 2h/epoque &
+Forward MiniLM a chaque batch &
+Mode rapide : pre-calcul unique des embeddings texte \\
+
+\rowcolor{silver}
+\texttt{DualEncoderModel(**config)} crash &
+\texttt{text\_input\_dim} absent du config sauvegarde &
+Correction de \texttt{export\_config()} pour sauvegarder \texttt{text\_input\_dim} \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\newpage
+
+% ═════════════════════════════════════════════════════════════
+\section{Resultats et evaluation}
+% ═════════════════════════════════════════════════════════════
+
+\subsection{Bilan quantitatif global}
+
+\begin{table}[H]
+\centering
+\caption{Bilan quantitatif du projet complet}
+\begin{tabular}{lrl}
+\toprule
+\rowcolor{navy}
+\textcolor{white}{\textbf{Metrique}} &
+\textcolor{white}{\textbf{Valeur}} &
+\textcolor{white}{\textbf{Detail}} \\
+\midrule
+Fichiers audio WAV       & 4\,985   & 16 kHz, mono, normalises \\
+\rowcolor{silver}
+Duree totale audio       & $\approx$17.6 h & $\approx$ 63\,600 secondes \\
+Chunks texte             & 6\,744   & 512 tokens, overlap 50 \\
+\rowcolor{silver}
+Paires audio--document   & 4\,985   & Jaccard moyen = 0.073 \\
+Paires d'entrainement    & 3\,988   & 80\% du dataset \\
+\rowcolor{silver}
+Dimension audio (Wav2Vec2) & 768D   & 94M parametres, gele \\
+Dimension texte (MiniLM)   & 384D   & 22M parametres, gele \\
+\rowcolor{silver}
+Espace partage           & 256D     & Dual Encoder projections \\
+Parametres entrainables  & $\sim$300K & 2 couches Linear uniquement \\
+\rowcolor{silver}
+Temps entrainement CPU   & $\sim$15 min & 20 epoques, mode rapide \\
+Recall@5 (objectif)      & $>$ 0.30 & Apres 20 epoques \\
+\rowcolor{silver}
+Recall@10 (objectif)     & $>$ 0.45 & Apres 20 epoques \\
+MRR (objectif)           & $>$ 0.25 & Apres 20 epoques \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Tests systeme}
+
+\begin{table}[H]
+\centering
+\caption{Resultats des tests systeme}
+\begin{tabularx}{\linewidth}{X c l}
+\toprule
+\textbf{Test} & \textbf{Resultat} & \textbf{Critere} \\
+\midrule
+Output shape SpeechEncoder = $(768,)$  & \textcolor{green}{\checkmark} & \texttt{emb.shape == (768,)} \\
+\rowcolor{silver}
+Norme L2 $\approx$ 1.0                 & \textcolor{green}{\checkmark} & $\|\hat{e}\|_2 = 1.0000$ \\
+Determinisme du SpeechEncoder          & \textcolor{green}{\checkmark} & meme input $\to$ meme output \\
+\rowcolor{silver}
+Batch encoding $(N, 768)$              & \textcolor{green}{\checkmark} & shape $[4985, 768]$ \\
+Validation handoff P1/P2               & \textcolor{green}{\checkmark} & manifest + paires OK \\
+\rowcolor{silver}
+Pre-calcul MiniLM $(N, 384)$           & \textcolor{green}{\checkmark} & shape $(6744, 384)$ \\
+Export embeddings $(N, 256)$           & \textcolor{green}{\checkmark} & shape $(6744, 256)$ \\
+\rowcolor{silver}
+API /health                            & \textcolor{green}{\checkmark} & \texttt{"status":"ok"} \\
+API /search/audio                      & \textcolor{green}{\checkmark} & 5 resultats avec scores \\
+\rowcolor{silver}
+Interface Gradio                       & \textcolor{green}{\checkmark} & Demarrage + 2 onglets OK \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\newpage
+
+% ═════════════════════════════════════════════════════════════
+\section{Conclusion et perspectives}
+% ═════════════════════════════════════════════════════════════
+
+\subsection{Bilan}
+
+Ce projet realise un systeme complet de \textbf{Speech-to-Retrieval} :
+depuis la collecte et le nettoyage des donnees audio et texte (P1),
+l'encodage vocal sans ASR via Wav2Vec2 (P2),
+l'alignement des espaces multimodaux par Dual Encoder contrastif (P3),
+jusqu'a l'exposition via API REST et interface web interactive (P4).
+
+L'innovation principale est le \textbf{mode rapide d'entrainement} : en pre-calculant
+les embeddings texte une seule fois, le pipeline rend l'entrainement accessible sur
+CPU ordinaire ($\sim$15 minutes pour 20 epoques), ce qui facilite l'experimentation
+et l'iteration rapide.
+
+\subsection{Perspectives d'amelioration}
+
+\begin{itemize}[leftmargin=1.5cm]
+  \item \textbf{Modele multilingue} --- Remplacer Wav2Vec2-base par
+        \texttt{facebook/wav2vec2-xls-r-300m} (300M parametres, 128 langues)
+        pour un support naturel du francais et du darija
+
+  \item \textbf{Fine-tuning partiel} --- Degeler les 2 a 4 dernieres couches
+        Transformer de Wav2Vec2 lors de l'entrainement pour une meilleure
+        adaptation semantique (necessite GPU)
+
+  \item \textbf{Corpus elargi} --- Passer de 570 a 1\,500 articles Wikipedia
+        ($\approx$ 18\,000 chunks) pour couvrir davantage de domaines
+
+  \item \textbf{Hard negative mining} --- Construire des negatifs difficiles
+        (documents semantiquement proches mais non pertinents) pour ameliorer
+        la discrimination du modele
+
+  \item \textbf{Encoder texte plus puissant} --- Remplacer MiniLM (384D) par
+        \texttt{all-mpnet-base-v2} (768D) pour des representations textuelles plus riches
+
+  \item \textbf{Augmentation audio} --- Ajout de bruit de fond, pitch shifting,
+        et changement de debit pour la robustesse
+
+  \item \textbf{Deploiement Snowflake} --- Exploiter le pipeline SQL genere
+        pour une integration en production dans un data warehouse d'entreprise
+\end{itemize}
+
+% ═════════════════════════════════════════════════════════════
+\section{Annexe : Structure du projet}
+% ═════════════════════════════════════════════════════════════
+
+\begin{lstlisting}[language=bash, caption={Arborescence du projet}]
+inpt_audioprocessing/
+|-- src/
+|   `-- speech_encoder.py        # SpeechEncoder (Wav2Vec2), _load_wav()
+|-- training/
+|   |-- models.py                # DualEncoderModel (audio + text projections)
+|   |-- losses.py                # contrastive_loss (InfoNCE), triplet_loss
+|   |-- metrics.py               # Recall@5, Recall@10, MRR
+|   |-- data.py                  # Dataset, TextEmbeddingStore, fast collate
+|   |-- train_dual_encoder.py    # Script d'entrainement principal
+|   |-- precompute_text.py       # Pre-calcul embeddings MiniLM
+|   |-- export_text_embeddings.py # Export embeddings 256D post-training
+|   `-- validate_handoff.py      # Validation des donnees P1/P2
+|-- api/
+|   `-- main.py                  # API FastAPI (5 endpoints)
+|-- demo/
+|   `-- app.py                   # Interface Gradio (2 onglets)
+|-- notebooks/
+|   |-- P1_Data_Engineer_v3.ipynb
+|   |-- P2_Speech_AI_Engineer_v2_FIXED.ipynb
+|   `-- S2R_Colab_Kaggle.ipynb   # Notebook cloud training
+|-- embeddings/                  # Matrices numpy + manifests CSV
+|-- models/                      # Checkpoints entraines
+|-- data/                        # Audio + texte + paires
+|-- inference.py                 # CLI end-to-end
+|-- run_pipeline.bat             # Pipeline Windows
+|-- run_pipeline.sh              # Pipeline Linux/macOS
+|-- snowflake_pipeline.sql       # Pipeline Snowflake complet
+`-- requirements.txt
+\end{lstlisting}
+
+% ═════════════════════════════════════════════════════════════
+\section{References}
+% ═════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=1.5cm, label={[\arabic*]}]
+  \item Baevski et al. (2020). \textit{wav2vec 2.0: A Framework for Self-Supervised
+        Learning of Speech Representations}. NeurIPS 2020.
+
+  \item Conneau et al. (2021). \textit{Unsupervised Cross-lingual Representation
+        Learning for Speech Recognition}. Interspeech 2021.
+
+  \item Reimers \& Gurevych (2019). \textit{Sentence-BERT: Sentence Embeddings
+        using Siamese BERT-Networks}. EMNLP 2019.
+
+  \item Johnson et al. (2019). \textit{Billion-scale similarity search with GPUs}.
+        IEEE Transactions on Big Data.
+
+  \item Panayotov et al. (2015). \textit{LibriSpeech: an ASR corpus based on
+        public domain audio books}. ICASSP 2015.
+
+  \item Chen et al. (2020). \textit{A Simple Framework for Contrastive Learning
+        of Visual Representations (SimCLR)}. ICML 2020.
+
+  \item Radford et al. (2021). \textit{Learning Transferable Visual Models
+        From Natural Language Supervision (CLIP)}. ICML 2021.
+
+  \item HuggingFace. \textit{openslr/librispeech\_asr}.
+        \url{https://huggingface.co/datasets/openslr/librispeech_asr}
+
+  \item HuggingFace. \textit{facebook/wav2vec2-base-960h}.
+        \url{https://huggingface.co/facebook/wav2vec2-base-960h}
+
+  \item HuggingFace. \textit{sentence-transformers/all-MiniLM-L6-v2}.
+        \url{https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2}
+
+  \item FAISS. \textit{Faiss: A library for efficient similarity search}.
+        \url{https://github.com/facebookresearch/faiss}
+
+  \item Snowflake Inc. \textit{Snowflake VECTOR type and similarity functions}.
+        Snowflake Documentation, 2024.
+\end{enumerate}
+
+% ═════════════════════════════════════════════════════════════
+\end{document}
+% ═════════════════════════════════════════════════════════════
