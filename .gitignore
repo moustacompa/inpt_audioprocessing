@@ -213,3 +213,5 @@ models/
 # data/chunks/
 
 .audioprocessing
+.venv
+.claude
