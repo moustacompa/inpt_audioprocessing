@@ -85,8 +85,8 @@ log "Vérification de l'environnement Python..."
 python --version || fail "Python introuvable. Activez votre virtualenv."
 
 log "Vérification des dépendances..."
-python -m venv .venv
-source .venv/Scripts/activate
+#python -m venv .venv
+#source .venv/Scripts/activate
 python -c "import torch, transformers, faiss, gradio, fastapi" 2>/dev/null \
     || fail "Dépendances manquantes. Exécutez : pip install -r requirements.txt"
 ok "Dépendances OK"
